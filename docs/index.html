@@ -81,7 +81,6 @@ window.MathJax = {
       \end{equation}
   </div>
 </section>
-
     
     <section class="top">
       <div class="controls">
@@ -93,18 +92,19 @@ window.MathJax = {
           <option value="">Custom (no preset)</option>
           <option value="small_gaussian">1. Small, fast, low-density soliton</option>
           <option value="quasistable">2. Quasi-stable, high-density soliton</option>
-          <option value="two_stable_soliton">3. Near jam (Ω_eq≈0)</option>
-          <option value="return_to_stability">4. Dense slow flow</option>
-          <option value="return_to_stability2">5. High perturbation</option>
-          <option value="three_quasi">6. High perturbation</option>
-          <option value="slow_onset">7. High perturbation</option>
-          <option value="sticky_d_zone1">8. High perturbation</option>
-          <option value="kvec_settle">9. High perturbation</option>
-          <option value="should_stop1">10. High perturbation</option>
-          <option value="should_stop2">11. High perturbation</option>
-          <option value="low_lh_diff">12. High perturbation</option>
-          <option value="sticky_stable_low_perturb">13. High perturbation</option>
-          <option value="sticky_stable_high_perturb">14. High perturbation</option>          
+          <option value="two_stable_soliton">3. Two high-density solitons</option>
+          <option value="stable_high_freq">4. Stable high freq. perturbation</option>
+          <option value="return_to_stability">5. Dense slow flow</option>
+          <option value="return_to_stability2">6. Ringing back to steady-state</option>
+          <option value="three_quasi">7. Low freq. perturb to steady-state</option>
+          <option value="slow_onset">8. Slow phase separation</option>
+          <option value="sticky_d_zone1">9. Slow phase separation (higher k)</option>
+          <option value="kvec_settle">10. XXXHigh perturbation</option>
+          <option value="should_stop1">11. Jammed J_eq, two stable solitons</option>
+          <option value="should_stop2">12. Jammed J_eq, unstable solitons</option>
+          <option value="low_lh_diff">14. High perturbation</option>
+          <option value="sticky_stable_low_perturb">14. High alpha, low perturbation</option>
+          <option value="sticky_stable_high_perturb">15. High alpha, high perturb solitons</option>         
     </select>
   </div>
           <div class="grid2">
@@ -204,7 +204,7 @@ const selPreset = document.getElementById('selPreset');
 const PRESETS = {
   small_gaussian:     { N:52,  R:5,   d0:0.6,  epsilon:0.5, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio:0.8 },
   quasistable:     { N:50, R:5,   d0:0.5, epsilon:0.5,nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio:1 }, // R*2π/N ≲ d0
-  two_stable_soliton:  { N:30,  R:6,   d0:0.4,  epsilon:0.05,nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio:0.4 },
+  two_stable_soliton:  { N:30,  R:6,   d0:0.5,  epsilon:0.05, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio:0.75 },
   stable_high_freq:   { N:50, R:5,   d0:0.6,  epsilon:0.1 ,nfreq:10, dt:0.0001, stepsPerFrame:500, alphaRatio:0.4 },
   return_to_stability: { N:50,  R:100,   d0:10,  epsilon:0.1, nfreq:3, dt:0.0001, stepsPerFrame:500, alphaRatio:1 },
   return_to_stability2: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:5, dt:0.0001, stepsPerFrame:500, alphaRatio:1.05 },
