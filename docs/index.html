@@ -361,12 +361,25 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       // advance positions
       for(let i=0;i<N;i++){ state.theta[i]=wrapAngle(state.theta[i]+state.omega[i]*dt); }
       // spacing Δ_i
+      // spacing Δ_i  (detect overtake with signed diff; keep wrapped gap for dynamics)
       const dth = new Array(N);
       for (let i=0;i<N;i++){
-        let diff = state.theta[(i+1)%N] - state.theta[i];
-        if (diff < 0) diff += TWO_PI;           // keep Δθ_i in [0, 2π)
-        dth[i] = diff;
-        if (diff <= EPS_CRASH) state.crashed = true; // crash if any gap vanishes
+        const raw = state.theta[(i+1)%N] - state.theta[i];
+      
+        // Signed local difference in (-π, π]
+        let signed = raw;
+        if (signed > Math.PI)  signed -= TWO_PI;
+        if (signed <= -Math.PI) signed += TWO_PI;
+      
+        // If neighbor order inverts, signed goes negative (true overtake, not ring wrap)
+        if (signed < -1e-12) state.crashed = true;
+      
+        // Positive arc length [0, 2π) for the rest of the model
+        const wrapped = raw < 0 ? raw + TWO_PI : raw;
+        dth[i] = wrapped;
+      
+        // Also flag exact/coincident contact (rare with discrete dt, but keep it)
+        if (wrapped <= EPS_CRASH) state.crashed = true;
       }
       // velocity relaxation
       for(let i=0;i<N;i++){
