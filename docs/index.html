@@ -154,10 +154,24 @@ window.MathJax = {
     const btnStart = document.getElementById('btnStart'), btnStop = document.getElementById('btnStop') || document.getElementById('btnPause'), btnReset = document.getElementById('btnReset');
     const chkShowRef = document.getElementById('chkShowRef');
     const chkPhase = document.getElementById('chkPhase');
-    const showRefRing = () => (!chkShowRef || chkShowRef.checked);
+    const showRefRing = () => state.OmegaEq > 0 && (!chkShowRef || chkShowRef.checked);
     const showPhase  = () => (!chkPhase   || chkPhase.checked);
     let rafId = null; // track current requestAnimationFrame so resets don't create multiple loops
 
+  function syncRefCheckbox(){
+    if (!chkShowRef) return;
+    const disable = state.OmegaEq <= 0;
+    chkShowRef.disabled = disable;
+    if (disable) chkShowRef.checked = false;
+
+    // optional visual gray-out
+    const lbl = chkShowRef.closest('label');
+    if (lbl) {
+      lbl.style.opacity = disable ? 0.5 : 1;
+      lbl.style.cursor  = disable ? 'not-allowed' : 'pointer';
+      lbl.title = disable ? 'Disabled when Ω_eq ≤ 0' : '';
+    }
+  }
     // Canvas fit/clear/size
     function prepCanvas(canvas, ctx){
       const dpr = window.devicePixelRatio||1;
@@ -241,9 +255,13 @@ window.MathJax = {
     // ==========================
     const computeAlphaC=(N,R,d0)=> 2*R*Math.exp(-(TWO_PI*R/N - d0));
     function updateOmegaEq(){
-      const d=TWO_PI/state.N;
-      state.OmegaEq = (state.R*d > state.d0) ? (1 - Math.exp(-(state.R*d - state.d0))) : 0;
+      const d = TWO_PI/state.N;
+      state.OmegaEq = (state.R*d > state.d0)
+        ? (1 - Math.exp(-(state.R*d - state.d0)))
+        : 0;
+      syncRefCheckbox();     // keep the checkbox state in sync
     }
+
     function initArrays(){
       const {N,epsilon,nfreq}=state, d=TWO_PI/N;
       state.theta=new Array(N); state.omega=new Array(N);
