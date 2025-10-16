@@ -527,12 +527,22 @@ window.MathJax = {
       const was=state.running; state.running=false;
       if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
       if(apply) applyParams({restartIfNChanged:true}); else updateOmegaEq();
+      forceInitialCheckboxes();
       initArrays();
       state.timeSeries={t:[],meanOmega:[],meanFlux:[]}; // clears RMS/Flux plot
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = 0.0';
       const d=new Array(state.N).fill(TWO_PI/state.N);
       drawMain(d); drawAgentCharts(); drawDeltaChart(d); drawTimeSeries();
       if(was){ state.running=true; rafId = requestAnimationFrame(tick); }
+    }
+
+    function forceInitialCheckboxes(){
+      if (chkPhase) chkPhase.checked = true;                 // always on
+      if (chkShowRef) {                                      // on only if meaningful
+        const allow = state.OmegaEq > 0;
+        chkShowRef.disabled = !allow;
+        chkShowRef.checked  = allow;
+      }
     }
 
     // ==================
@@ -614,7 +624,7 @@ window.MathJax = {
 Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`);
     });
 
-    applyParams({restartIfNChanged:false}); initArrays(); saveUIFromState(); resizeAll(); initDragResize();
+    applyParams({restartIfNChanged:false}); forceInitialCheckboxes(); initArrays(); saveUIFromState(); resizeAll(); initDragResize();
     window.addEventListener('resize', resizeAll);
 
     // =================
