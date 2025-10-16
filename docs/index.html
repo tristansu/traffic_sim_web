@@ -110,18 +110,20 @@ window.MathJax = {
               <div><label for="inpSteps">Steps / frame</label><input id="inpSteps" type="number" value="500" step="1" /></div>
             </div>
           </div>
-        </div>
-
-        <div class="group">
-          <div style="margin-top:8px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+                    <!-- Actions (moved inside parameter group) -->
+          <div class="actions" style="margin-top:10px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
             <div class="btnRow" style="display:flex;gap:12px;">
               <button id="btnStart" class="primary">Start</button>
               <button id="btnStop" class="muted">Stop</button>
               <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation">Reset</button>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
-              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkShowRef" checked /> show θᵢ(t) − Ωₑᵩt ring</label>
-              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkPhase" checked /> show two-phase classification</label>
+              <label style="display:inline-flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="chkShowRef" checked /> show θᵢ(t) − Ωₑᵩt ring
+              </label>
+              <label style="display:inline-flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="chkPhase" checked /> show two-phase classification
+              </label>
             </div>
           </div>
         </div>
