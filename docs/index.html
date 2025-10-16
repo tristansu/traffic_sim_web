@@ -115,6 +115,7 @@ window.MathJax = {
             <div class="btnRow" style="display:flex;gap:12px;">
               <button id="btnStart" class="primary">Start</button>
               <button id="btnStop" class="muted">Stop</button>
+              <button id="btnStep" class="muted" title="Advance one frame">Step</button>   <!-- added -->
               <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation">Reset</button>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
@@ -176,7 +177,10 @@ window.MathJax = {
     const inpN = document.getElementById('inpN'), inpR = document.getElementById('inpR'), inpd0 = document.getElementById('inpd0');
     const inpEps = document.getElementById('inpEps'), inpNfreq = document.getElementById('inpNfreq');
     const inpDt = document.getElementById('inpDt'), inpSteps = document.getElementById('inpSteps'), inpAlphaRatio = document.getElementById('inpAlphaRatio');
-    const btnStart = document.getElementById('btnStart'), btnStop = document.getElementById('btnStop') || document.getElementById('btnStop'), btnReset = document.getElementById('btnReset');
+    const btnStart = document.getElementById('btnStart'),
+      btnStop  = document.getElementById('btnStop'),
+      btnStep  = document.getElementById('btnStep'),
+      btnReset = document.getElementById('btnReset');
     const chkShowRef = document.getElementById('chkShowRef');
     const chkPhase = document.getElementById('chkPhase');
     const showRefRing = () => state.OmegaEq > 0 && (!chkShowRef || chkShowRef.checked);
@@ -631,9 +635,37 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
 
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = '+state.t.toFixed(1);
       drawMain(dth); drawAgentCharts(); drawDeltaChart(dth); drawTimeSeries();
+      if (!state.running) updateButtons();
       if (state.running && !state.crashed) rafId = requestAnimationFrame(tick);
     }
 
+    function stepFrame(){
+      // Only step when stopped
+      if (state.running) return;
+    
+      let dth;
+      for (let s=0; s<state.stepsPerFrame; s++){
+        dth = stepOnce();
+        state.t += state.dt;
+        if (state.crashed) break;
+      }
+    
+      // If you added kymographs earlier, update them:
+      if (typeof updateKymos === 'function') updateKymos(dth);
+    
+      const {meanJ, rmsOmega} = computeFluxAndStats(dth);
+      state.timeSeries.t.push(state.t);
+      state.timeSeries.meanOmega.push(state.OmegaEq>0 ? rmsOmega/state.OmegaEq : rmsOmega);
+      state.timeSeries.meanFlux.push(meanJ);
+    
+      titlePolar.innerHTML = 'T (Ω<sub>max</sub><sup>-1</sup>) = ' + state.t.toFixed(1);
+      drawMain(dth);
+      drawAgentCharts();
+      drawDeltaChart(dth);
+      if (typeof drawKymoPanels === 'function') drawKymoPanels();
+      drawTimeSeries();
+    }
+    
     // =====
     // Reset
     // =====
@@ -649,6 +681,7 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const d=new Array(state.N).fill(TWO_PI/state.N);
       drawMain(d); drawAgentCharts(); drawDeltaChart(d); drawTimeSeries();
       if(was){ state.running=true; rafId = requestAnimationFrame(tick); }
+      updateButtons();
     }
 
     function forceInitialCheckboxes(){
@@ -713,15 +746,20 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     // ======================
     // Events & first render
     // ======================
+    function updateButtons(){
+      if (btnStep) btnStep.disabled = !!state.running;
+    }
+    
     function resizeAll(){
       syncCanvasSizes();
       const d=currentDeltaTheta();
       drawMain(d); drawAgentCharts(); drawDeltaChart(d); drawTimeSeries();
     }
-
+    
     inpSteps.addEventListener('input', ()=>{ let v=Math.round(+inpSteps.value); if(!Number.isFinite(v)||v<1) v=1; inpSteps.value=String(v); state.stepsPerFrame=v; });
-    btnStart && btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; rafId = requestAnimationFrame(tick); } });
-    btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } });
+    btnStart && btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; updateButtons(); rafId = requestAnimationFrame(tick); } });
+    btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }; updateButtons(); });
+    btnStep && btnStep.addEventListener('click', stepFrame);
     btnReset && btnReset.addEventListener('click', ()=> hardReset({apply:true}) );
     // Update visuals immediately when toggling overlays
     chkShowRef && chkShowRef.addEventListener('change', resizeAll);
@@ -745,6 +783,7 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
     saveUIFromState(); 
     resizeAll(); 
     initDragResize();
+    updateButtons();
     if (selPreset) selPreset.value = '';
     window.addEventListener('resize', resizeAll);
 
