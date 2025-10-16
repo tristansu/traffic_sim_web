@@ -30,15 +30,33 @@
     button:hover{filter:brightness(1.05)} button:active{transform:translateY(1px)} .primary{border-color:#3b82f6;background:linear-gradient(180deg,#1f2e47 0%,#152135 100%)} .danger{border-color:#be123c;background:linear-gradient(180deg,#3a1923 0%,#2a1017 100%)} .muted{background:#0d1117;border-color:#1f2431}
     footer{font-size:12px;color:var(--muted)} a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
     @media (max-width:1100px){.shell{grid-template-columns:1fr}}
+      /* Math styling for inline labels */
+    .math{ font-family: "STIX Two Math","Cambria Math","Times New Roman",serif; font-style: italic; }
+    .math sub{ font-size:.75em; line-height:0; vertical-align:-0.25em; }
+    .math sup{ font-size:.75em; line-height:0; vertical-align:0.45em; }
+    header .eq{ margin-top:8px; }
   </style>
+  <script>window.MathJax = { tex: { inlineMath: [['$','$'], ['\(','\)']], displayMath: [['$$','$$'], ['\[','\]']] }, svg: { fontCache: 'global' } };</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 </head>
 <body>
   <div class="shell">
     <header>
       <div>
-        <h1>Agent-Based Traffic Model</h1>
-        <div class="sub">Simulation of multiple agents interacting via the dnyamical equations discussed <a href=XXX>here</a>.</div>
+        <h1>Agent-Based Traffic Simulator</h1>
+        <div class="sub">Simulation of multiple agents interacting via the dynamical equations discussed <a href=XXX>here</a>, and shown to the right for reference.</div>
       </div>
+            <div class="eq">
+\begin{equation}
+\ddot{\theta}_i=
+\left\{
+    \begin{array}{lr}
+        -\alpha \dot{\theta}_i & \Delta_{i}<\frac{d_o}{R}\\
+        \alpha \left(1-e^{-(R\Delta_i - d_o)} - \dot{\theta}_i\right) & \Delta_{i}\geq \frac{d_o}{R}
+    \end{array}
+    \right.
+\end{equation}
+        </div>
     </header>
 
     <section class="top">
@@ -68,9 +86,8 @@
               <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation">Apply Params & Reset</button>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
-              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkShowRef" checked /> show Ω<sub>eq</sub> ring</label>
-              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkShowCharts" checked /> Show charts</label>
-            </div>
+              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkShowRef" checked /> show <span class="math">&theta;<sub>i<\/sub>(t) &minus; &Omega;<sub>eq<\/sub>t<\/span> ring<\/label>
+              </div>
           </div>
         </div>
       </div>
@@ -109,7 +126,8 @@
     // Constants, DOM, light utilities
     // ================================
     const TWO_PI = Math.PI*2;
-    const AXIS_COLOR = "#cfd3dc", AXIS_W = 3, DASH_W = 2, FONT_PX = 16;
+    const AXIS_COLOR = "#cfd3dc", AXIS_W = 3, DASH_W = 2, FONT_PX = 16; // restored constants
+    const DOT_SCALE = 1.3; // 30% larger agent color dots
 
     const main = document.getElementById('canvasMain'), ctxMain = main.getContext('2d');
     const cnvOmega = document.getElementById('canvasOmega'), ctxOmega = cnvOmega.getContext('2d');
@@ -122,7 +140,7 @@
     const inpEps = document.getElementById('inpEps'), inpNfreq = document.getElementById('inpNfreq');
     const inpDt = document.getElementById('inpDt'), inpSteps = document.getElementById('inpSteps'), inpAlphaRatio = document.getElementById('inpAlphaRatio');
     const btnStart = document.getElementById('btnStart'), btnStop = document.getElementById('btnStop') || document.getElementById('btnPause'), btnReset = document.getElementById('btnReset');
-    const chkShowCharts = document.getElementById('chkShowCharts'), chkShowRef = document.getElementById('chkShowRef');
+    const chkShowRef = document.getElementById('chkShowRef');
 
     // Canvas fit/clear/size
     function prepCanvas(canvas, ctx){
@@ -296,8 +314,8 @@
 
       const {r:r1,phi:phi1}=complexMeanAngles(state.theta);
       // density wedges
-      let rhoH=0,rhoL=Infinity; for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d);}
-      let phi_l=0,phi_h=0; if(isFinite(rhoL)&&rhoH>rhoL){ phi_l=(TWO_PI*rhoH-state.N)/(rhoH-rhoL); phi_h=TWO_PI-phi_l; phi_l=clamp(phi_l,0,TWO_PI); phi_h=clamp(phi_h,0,TWO_PI);}
+      let rhoH=0,rhoL=Infinity; for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d);} 
+      let phi_l=0,phi_h=0; if(isFinite(rhoL)&&rhoH>rhoL){ phi_l=(TWO_PI*rhoH-state.N)/(rhoH-rhoL); phi_h=TWO_PI-phi_l; phi_l=clamp(phi_l,0,TWO_PI); phi_h=clamp(phi_h,0,TWO_PI);} 
 
       drawCircle(cxL,cy,baseR);
       if(phi_h>0) fillWedge(cxL,cy,baseR,phi1-phi_h/2,phi1+phi_h/2,"rgba(220,70,70,0.32)");
@@ -311,7 +329,7 @@
       // agent dots (left)
       for(let k=0;k<state.N;k++){
         const x=cxL+baseR*Math.cos(state.theta[k]), y=cy+baseR*Math.sin(state.theta[k]);
-        ctxMain.beginPath(); ctxMain.arc(x,y,4.2,0,TWO_PI); ctxMain.fillStyle=state.colors[k]; ctxMain.fill();
+        ctxMain.beginPath(); ctxMain.arc(x,y,4.2*DOT_SCALE,0,TWO_PI); ctxMain.fillStyle=state.colors[k]; ctxMain.fill();
       }
 
       // reference ring with Ω_eq removing uniform drift (right)
@@ -319,7 +337,7 @@
         drawCircle(cxR,cy,baseR);
         for(let k=0;k<state.N;k++){
           const x=cxR+baseR*Math.cos(state.theta[k]-state.OmegaEq*state.t), y=cy+baseR*Math.sin(state.theta[k]-state.OmegaEq*state.t);
-          ctxMain.beginPath(); ctxMain.arc(x,y,4,0,TWO_PI); ctxMain.fillStyle=state.colors[k]; ctxMain.fill();
+          ctxMain.beginPath(); ctxMain.arc(x,y,4*DOT_SCALE,0,TWO_PI); ctxMain.fillStyle=state.colors[k]; ctxMain.fill();
         }
       }
 
@@ -376,7 +394,7 @@
       for(let i=0;i<state.N;i++){
         const x=LEFT+(W-50)*(i/(state.N-1));
         const y=TOP+(1-clamp(state.omega[i]/1.05,0,1))*(BOTTOM-TOP);
-        ctxOmega.beginPath(); ctxOmega.arc(x,y,3.2,0,TWO_PI); ctxOmega.fillStyle=state.colors[i]; ctxOmega.fill();
+        ctxOmega.beginPath(); ctxOmega.arc(x,y,3.2*DOT_SCALE,0,TWO_PI); ctxOmega.fillStyle=state.colors[i]; ctxOmega.fill();
       }
 
       drawMathText(ctxOmega,"Agent (i)",W/2,H-8,{size:FONT_PX,align:'center'});
@@ -417,14 +435,14 @@
       // Δᵢ curve + markers
       ctxDelta.strokeStyle="#7d8ecb"; ctxDelta.lineWidth=2; ctxDelta.beginPath();
       for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=yFrom(dth[i]); if(i===0) ctxDelta.moveTo(x,y); else ctxDelta.lineTo(x,y);} ctxDelta.stroke();
-      for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=yFrom(dth[i]); ctxDelta.beginPath(); ctxDelta.arc(x,y,3,0,TWO_PI); ctxDelta.fillStyle=dth[i]>0?state.colors[i]:"#222"; ctxDelta.fill(); }
+      for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=yFrom(dth[i]); ctxDelta.beginPath(); ctxDelta.arc(x,y,3*DOT_SCALE,0,TWO_PI); ctxDelta.fillStyle=dth[i]>0?state.colors[i]:"#222"; ctxDelta.fill(); }
 
       drawMathText(ctxDelta,"Agent (i)",W/2,H-8,{size:FONT_PX,align:'center'});
       ctxDelta.save(); ctxDelta.translate(14,H/2); ctxDelta.rotate(-Math.PI/2); drawMathText(ctxDelta,"Δ_{i} (rad)",0,0,{size:FONT_PX,align:'center'}); ctxDelta.restore();
     }
 
     function drawTimeSeries(){
-      const show=chkShowCharts.checked; cnvTime.style.display=show?'block':'none'; if(!show) return; const tArr=state.timeSeries.t; if(tArr.length<2) { const _=prepCanvas(cnvTime,ctxTime); return; }
+      cnvTime.style.display='block'; const tArr=state.timeSeries.t; if(tArr.length<2) { const _=prepCanvas(cnvTime,ctxTime); return; }
       const {W,H}=prepCanvas(cnvTime,ctxTime); const LEFT=40, RIGHT=W-40, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
       const tmin=tArr[0], tmax=tArr[tArr.length-1], mapX=v=> LEFT + ((v-tmin)/(tmax-tmin))*(RIGHT-LEFT);
       const L=state.timeSeries.meanOmega, R=state.timeSeries.meanFlux, d=TWO_PI/state.N; const Jss=(state.R*d>state.d0)? (1-Math.exp(-(state.R*d-state.d0)))*(state.N/(TWO_PI)) : undefined;
@@ -579,6 +597,11 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
         push('buttons present', !!btnStart && !!btnStop && !!btnReset, `start=${!!btnStart}, stop=${!!btnStop}, reset=${!!btnReset}`);
         const cd=currentDeltaTheta(); push('deltaTheta length=N', cd.length===state.N, `len=${cd.length}`);
         try{ resizeAll(); push('resizeAll executes', true);}catch(err){ push('resizeAll executes', false, err&&err.message?err.message:String(err)); }
+
+        // Additional tests to prevent regressions
+        push('constants defined', typeof AXIS_COLOR==='string' && typeof AXIS_W==='number' && typeof DASH_W==='number' && typeof FONT_PX==='number');
+        push('DOT_SCALE set', Math.abs(DOT_SCALE-1.3)<1e-9, `DOT_SCALE=${DOT_SCALE}`);
+        push('no accidental $1 global', typeof window.$1==='undefined');
       }catch(e){ push('self-test error',false,e&&e.message?e.message:String(e)); }
       console.table(tests);
     })();
