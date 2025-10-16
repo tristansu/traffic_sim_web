@@ -89,11 +89,20 @@ window.MathJax = {
         <label for="selPreset" style="margin:0;">Preset:</label>
         <select id="selPreset">
           <option value="">Custom (no preset)</option>
-          <option value="small_gaussian">Small, fast, low-density soliton</option>
-          <option value="quasistable">Quasi-stable, high-density soliton</option>
-          <option value="sparse_fast">Near jam (Ω_eq≈0)</option>
-          <option value="dense_slow">Dense slow flow</option>
-          <option value="high_perturb">High perturbation</option>
+          <option value="small_gaussian">1. Small, fast, low-density soliton</option>
+          <option value="quasistable">2. Quasi-stable, high-density soliton</option>
+          <option value="two_stable_soliton">3. Near jam (Ω_eq≈0)</option>
+          <option value="return_to_stability">4. Dense slow flow</option>
+          <option value="return_to_stability2">5. High perturbation</option>
+          <option value="three_quasi">6. High perturbation</option>
+          <option value="slow_onset">7. High perturbation</option>
+          <option value="sticky_d_zone1">8. High perturbation</option>
+          <option value="kvec_settle">9. High perturbation</option>
+          <option value="should_stop1">10. High perturbation</option>
+          <option value="should_stop2">11. High perturbation</option>
+          <option value="low_lh_diff">12. High perturbation</option>
+          <option value="sticky_stable_low_perturb">13. High perturbation</option>
+          <option value="sticky_stable_high_perturb">14. High perturbation</option>          
     </select>
   </div>
           <div class="grid2">
@@ -193,9 +202,19 @@ const selPreset = document.getElementById('selPreset');
 const PRESETS = {
   small_gaussian:     { N:52,  R:5,   d0:0.6,  epsilon:0.5, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio:0.8 },
   quasistable:     { N:50, R:5,   d0:0.5, epsilon:0.5,nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio:1 }, // R*2π/N ≲ d0
-  sparse_fast:  { N:30,  R:6,   d0:0.4,  epsilon:0.05,nfreq:2, dt:0.0005, stepsPerFrame:120, alphaRatio:0.6 },
-  dense_slow:   { N:120, R:5,   d0:0.6,  epsilon:0.08,nfreq:4, dt:0.0005, stepsPerFrame:120, alphaRatio:0.3 },
-  high_perturb: { N:50,  R:5,   d0:0.6,  epsilon:0.3, nfreq:7, dt:0.0005, stepsPerFrame:120, alphaRatio:0.4 },
+  two_stable_soliton:  { N:30,  R:6,   d0:0.4,  epsilon:0.05,nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio:0.4 },
+  stable_high_freq:   { N:50, R:5,   d0:0.6,  epsilon:0.1 ,nfreq:10, dt:0.0001, stepsPerFrame:500, alphaRatio:0.4 },
+  return_to_stability: { N:50,  R:100,   d0:10,  epsilon:0.1, nfreq:3, dt:0.0001, stepsPerFrame:500, alphaRatio:1 },
+  return_to_stability2: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:5, dt:0.0001, stepsPerFrame:500, alphaRatio:1.05 },
+  three_quasi: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:1, dt:0.0001, stepsPerFrame:500, alphaRatio:2 },
+  slow_onset: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:1, dt:0.0001, stepsPerFrame:500, alphaRatio:0.99 },
+  sticky_d_zone1: { N:50,  R:10,   d0:0.5,  epsilon:0.05, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio:0.98 },
+  kvec_settle: { N:50,  R:100,   d0:0.6,  epsilon:0.05, nfreq:15, dt:0.0001, stepsPerFrame:500, alphaRatio:0.2 },
+  should_stop1: { N:50,  R:5,   d0:0.8,  epsilon:0.5, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio: 0.25 },
+  should_stop2: { N:50,  R:5,   d0:0.8,  epsilon:0.25, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio: 0.25 },
+  low_lh_diff: { N:50,  R:5,   d0:0.55,  epsilon:0.2, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio: 0.25 },
+  sticky_stable_low_perturb: { N:200,  R:50,   d0:0.5,  epsilon:0.9, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio: 1.1 },
+  sticky_stable_high_perturb: { N:200,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio: 1.1 },
 };
 
 function setInputsFromPreset(p) {
