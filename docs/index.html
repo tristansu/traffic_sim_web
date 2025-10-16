@@ -347,12 +347,12 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const prevN=state.N;
       state.N=Math.max(3,Math.min(2000,parseInt(inpN.value||"50")));
       state.R=parseFloat(inpR.value||"5");
-      state.d0=parseFloat(inpd0.value||"0.6");
-      state.epsilon=parseFloat(inpEps.value||"0.1");
-      state.nfreq=parseFloat(inpNfreq.value||"7");
-      state.dt=parseFloat(inpDt.value||"0.0005");
+      state.d0=parseFloat(inpd0.value||"0.5");
+      state.epsilon=parseFloat(inpEps.value||"0.5");
+      state.nfreq=parseFloat(inpNfreq.value||"0.5");
+      state.dt=parseFloat(inpDt.value||"0.0001");
       let spf=Math.round(+inpSteps.value); state.stepsPerFrame = (Number.isFinite(spf)&&spf>0)?spf:1;
-      state.alphaRatio=parseFloat(inpAlphaRatio.value||"0.4");
+      state.alphaRatio=parseFloat(inpAlphaRatio.value||"0.5");
       state.alphaC=computeAlphaC(state.N,state.R,state.d0);
       state.alpha=state.alphaRatio*state.alphaC;
       updateOmegaEq();
