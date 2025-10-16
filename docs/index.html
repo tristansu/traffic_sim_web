@@ -141,6 +141,7 @@
     const inpDt = document.getElementById('inpDt'), inpSteps = document.getElementById('inpSteps'), inpAlphaRatio = document.getElementById('inpAlphaRatio');
     const btnStart = document.getElementById('btnStart'), btnStop = document.getElementById('btnStop') || document.getElementById('btnPause'), btnReset = document.getElementById('btnReset');
     const chkShowRef = document.getElementById('chkShowRef');
+    let rafId = null; // track current requestAnimationFrame so resets don't create multiple loops
 
     // Canvas fit/clear/size
     function prepCanvas(canvas, ctx){
@@ -348,7 +349,7 @@
 
     function drawAgentCharts(){
       const {W,H}=prepCanvas(cnvOmega,ctxOmega);
-      const LEFT=40, RIGHT=W-10, TITLE_Y=20, TOP=TITLE_Y+25, BOTTOM=H-30;
+      const LEFT=72, RIGHT=W-16, TITLE_Y=20, TOP=TITLE_Y+25, BOTTOM=H-30;
 
       // axes
       ctxOmega.strokeStyle=AXIS_COLOR; ctxOmega.lineWidth=AXIS_W;
@@ -386,13 +387,13 @@
       ctxOmega.strokeStyle="#8892a6"; ctxOmega.lineWidth=2;
       ctxOmega.beginPath();
       for(let i=0;i<state.N;i++){
-        const x=LEFT+(W-50)*(i/(state.N-1));
+        const x=LEFT+((RIGHT-LEFT))*(i/(state.N-1));
         const y=TOP+(1-clamp(state.omega[i]/1.05,0,1))*(BOTTOM-TOP);
         if(i===0) ctxOmega.moveTo(x,y); else ctxOmega.lineTo(x,y);
       }
       ctxOmega.stroke();
       for(let i=0;i<state.N;i++){
-        const x=LEFT+(W-50)*(i/(state.N-1));
+        const x=LEFT+((RIGHT-LEFT))*(i/(state.N-1));
         const y=TOP+(1-clamp(state.omega[i]/1.05,0,1))*(BOTTOM-TOP);
         ctxOmega.beginPath(); ctxOmega.arc(x,y,3.2*DOT_SCALE,0,TWO_PI); ctxOmega.fillStyle=state.colors[i]; ctxOmega.fill();
       }
@@ -404,7 +405,7 @@
 
     function drawDeltaChart(dth){
       const {W,H}=prepCanvas(cnvDelta,ctxDelta);
-      const LEFT=40, RIGHT=W-40, TOP=10, BOTTOM=H-30;
+      const LEFT=72, RIGHT=W-16, TOP=10, BOTTOM=H-30;
 
       // axes
       ctxDelta.strokeStyle=AXIS_COLOR; ctxDelta.lineWidth=AXIS_W;
@@ -434,8 +435,8 @@
 
       // Δᵢ curve + markers
       ctxDelta.strokeStyle="#7d8ecb"; ctxDelta.lineWidth=2; ctxDelta.beginPath();
-      for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=yFrom(dth[i]); if(i===0) ctxDelta.moveTo(x,y); else ctxDelta.lineTo(x,y);} ctxDelta.stroke();
-      for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=yFrom(dth[i]); ctxDelta.beginPath(); ctxDelta.arc(x,y,3*DOT_SCALE,0,TWO_PI); ctxDelta.fillStyle=dth[i]>0?state.colors[i]:"#222"; ctxDelta.fill(); }
+      for(let i=0;i<state.N;i++){ const x=LEFT+((RIGHT-LEFT))*(i/(state.N-1)); const y=yFrom(dth[i]); if(i===0) ctxDelta.moveTo(x,y); else ctxDelta.lineTo(x,y);} ctxDelta.stroke();
+      for(let i=0;i<state.N;i++){ const x=LEFT+((RIGHT-LEFT))*(i/(state.N-1)); const y=yFrom(dth[i]); ctxDelta.beginPath(); ctxDelta.arc(x,y,3*DOT_SCALE,0,TWO_PI); ctxDelta.fillStyle=dth[i]>0?state.colors[i]:"#222"; ctxDelta.fill(); }
 
       drawMathText(ctxDelta,"Agent (i)",W/2,H-8,{size:FONT_PX,align:'center'});
       ctxDelta.save(); ctxDelta.translate(14,H/2); ctxDelta.rotate(-Math.PI/2); drawMathText(ctxDelta,"Δ_{i} (rad)",0,0,{size:FONT_PX,align:'center'}); ctxDelta.restore();
@@ -443,7 +444,7 @@
 
     function drawTimeSeries(){
       cnvTime.style.display='block'; const tArr=state.timeSeries.t; if(tArr.length<2) { const _=prepCanvas(cnvTime,ctxTime); return; }
-      const {W,H}=prepCanvas(cnvTime,ctxTime); const LEFT=40, RIGHT=W-40, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
+      const {W,H}=prepCanvas(cnvTime,ctxTime); const LEFT=72, RIGHT=W-72, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
       const tmin=tArr[0], tmax=tArr[tArr.length-1], mapX=v=> LEFT + ((v-tmin)/(tmax-tmin))*(RIGHT-LEFT);
       const L=state.timeSeries.meanOmega, R=state.timeSeries.meanFlux, d=TWO_PI/state.N; const Jss=(state.R*d>state.d0)? (1-Math.exp(-(state.R*d-state.d0)))*(state.N/(TWO_PI)) : undefined;
       let lmin=Math.min(...L), lmax=Math.max(...L); if(!isFinite(lmin)||!isFinite(lmax)){ lmin=0; lmax=1; } const lpad=(lmax-lmin||1)*.15; const mapY1=v=> TOP + (1-((v-(lmin-lpad))/((lmax+lpad)-(lmin-lpad))))*(H-40);
@@ -455,7 +456,14 @@
       if(Number.isFinite(Jss)){ ctxTime.setLineDash([6,6]); ctxTime.lineWidth=DASH_W; ctxTime.strokeStyle="#f5a14b"; const yRef=mapY2(Jss); ctxTime.beginPath(); ctxTime.moveTo(LEFT,yRef); ctxTime.lineTo(RIGHT,yRef); ctxTime.stroke(); ctxTime.setLineDash([]); }
       drawMathText(ctxTime,"t (Ω_{max}^{-1})",W/2,H-8,{size:FONT_PX,align:'center'});
       ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{eq})/Ω_{eq}":"RMS(ω−Ω_{eq})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
-      ctxTime.save(); ctxTime.translate(RIGHT+18,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime,"⟨J⟩",0,0,{size:FONT_PX,align:'center',color:'#f5a14b'}); ctxTime.restore();
+      // place ⟨J⟩ to the right of tick labels so it doesn't overlap the axis
+const rightTickStrings = niceTicks(rmin-rpad,rmax+rpad,5).map(v=>String(+v.toFixed(2)).replace(/\.00$/,""));
+ctxTime.font = `${12}px system-ui, -apple-system, Segoe UI, Roboto`;
+let maxRightW = 0; for(const s of rightTickStrings){ const w = ctxTime.measureText(s).width; if(w>maxRightW) maxRightW = w; }
+const labelX = RIGHT + 8 + maxRightW + 24; // tick label start + widest label + margin
+ctxTime.save(); ctxTime.translate(labelX,H/2); ctxTime.rotate(-Math.PI/2);
+drawMathText(ctxTime,"⟨J⟩",0,0,{size:FONT_PX,align:'center',color:'#f5a14b'});
+ctxTime.restore();
     }
 
     // =========
@@ -473,7 +481,7 @@
 
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = '+state.t.toFixed(1);
       drawMain(dth); drawAgentCharts(); drawDeltaChart(dth); drawTimeSeries();
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     }
 
     // =====
@@ -481,13 +489,14 @@
     // =====
     function hardReset({apply=true}={}){
       const was=state.running; state.running=false;
+      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
       if(apply) applyParams({restartIfNChanged:true}); else updateOmegaEq();
       initArrays();
       state.timeSeries={t:[],meanOmega:[],meanFlux:[]}; // clears RMS/Flux plot
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = 0.0';
       const d=new Array(state.N).fill(TWO_PI/state.N);
       drawMain(d); drawAgentCharts(); drawDeltaChart(d); drawTimeSeries();
-      if(was){ state.running=true; requestAnimationFrame(tick); }
+      if(was){ state.running=true; rafId = requestAnimationFrame(tick); }
     }
 
     // ==================
@@ -550,8 +559,8 @@
     }
 
     inpSteps.addEventListener('input', ()=>{ let v=Math.round(+inpSteps.value); if(!Number.isFinite(v)||v<1) v=1; inpSteps.value=String(v); state.stepsPerFrame=v; });
-    btnStart && btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; requestAnimationFrame(tick); } });
-    btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; });
+    btnStart && btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; rafId = requestAnimationFrame(tick); } });
+    btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } });
     btnReset && btnReset.addEventListener('click', ()=> hardReset({apply:true}) );
 
     document.getElementById('howHost')?.addEventListener('click', e=>{
@@ -609,7 +618,7 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
     // =========
     // Autostart
     // =========
-    state.running=true; requestAnimationFrame(tick);
+    state.running=true; rafId = requestAnimationFrame(tick);
 
   </script>
 </body>
