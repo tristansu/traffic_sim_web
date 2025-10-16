@@ -90,21 +90,20 @@ window.MathJax = {
         <label for="selPreset" style="margin:0;">Preset:</label>
         <select id="selPreset">
           <option value="">Custom (no preset)</option>
-          <option value="small_gaussian">1. Small, fast, low-density soliton</option>
-          <option value="quasistable">2. Quasi-stable, high-density soliton</option>
-          <option value="two_stable_soliton">3. Two high-density solitons</option>
+          <option value="small_gaussian">1. Small, fast, low-density soliton</option> <!-- good -->
+          <option value="quasistable">2. Quasi-stable, high-density soliton</option><!-- good -->
+          <option value="two_stable_soliton">3. Two high-density solitons</option><!-- good -->
           <option value="stable_high_freq">4. Stable high freq. perturbation</option>
-          <option value="return_to_stability">5. Dense slow flow</option>
-          <option value="return_to_stability2">6. Ringing back to steady-state</option>
-          <option value="three_quasi">7. Low freq. perturb to steady-state</option>
-          <option value="slow_onset">8. Slow phase separation</option>
-          <option value="sticky_d_zone1">9. Slow phase separation (higher k)</option>
-          <option value="kvec_settle">10. XXXHigh perturbation</option>
-          <option value="should_stop1">11. Jammed J_eq, two stable solitons</option>
-          <option value="should_stop2">12. Jammed J_eq, unstable solitons</option>
-          <option value="low_lh_diff">14. High perturbation</option>
-          <option value="sticky_stable_low_perturb">14. High alpha, low perturbation</option>
-          <option value="sticky_stable_high_perturb">15. High alpha, high perturb solitons</option>         
+          <option value="return_to_stability2">5. Ringing back to steady-state</option>
+          <option value="three_quasi">6. Low freq. perturb to steady-state</option>
+          <option value="slow_onset">7. Slow phase separation</option>
+          <option value="sticky_d_zone1">8. Slow phase separation (higher k)</option>
+          <option value="kvec_settle">9. XXXHigh perturbation</option>
+          <option value="should_stop1">10. Jammed J_eq, two stable solitons</option>
+          <option value="should_stop2">11. Jammed J_eq, unstable solitons</option>
+          <option value="low_lh_diff">12. Two-phase w/ similar densities</option>
+          <option value="sticky_stable_low_perturb">13. High alpha, low perturbation</option>
+          <option value="sticky_stable_high_perturb">14. High alpha, high perturb solitons</option>         
     </select>
   </div>
           <div class="grid2">
@@ -206,15 +205,14 @@ const PRESETS = {
   quasistable:     { N:50, R:5,   d0:0.5, epsilon:0.5,nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio:1 }, // R*2π/N ≲ d0
   two_stable_soliton:  { N:30,  R:6,   d0:0.5,  epsilon:0.05, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio:0.75 },
   stable_high_freq:   { N:50, R:5,   d0:0.6,  epsilon:0.1 ,nfreq:10, dt:0.0001, stepsPerFrame:500, alphaRatio:0.4 },
-  return_to_stability: { N:50,  R:100,   d0:10,  epsilon:0.1, nfreq:3, dt:0.0001, stepsPerFrame:500, alphaRatio:1 },
   return_to_stability2: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:5, dt:0.0001, stepsPerFrame:500, alphaRatio:1.05 },
   three_quasi: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:1, dt:0.0001, stepsPerFrame:500, alphaRatio:2 },
   slow_onset: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:1, dt:0.0001, stepsPerFrame:500, alphaRatio:0.99 },
   sticky_d_zone1: { N:50,  R:10,   d0:0.5,  epsilon:0.05, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio:0.98 },
-  kvec_settle: { N:50,  R:100,   d0:0.6,  epsilon:0.05, nfreq:15, dt:0.0001, stepsPerFrame:500, alphaRatio:0.2 },
+  kvec_settle: { N:50,  R:5,   d0:0.6,  epsilon:0.05, nfreq:15, dt:0.0001, stepsPerFrame:500, alphaRatio:0.4 },
   should_stop1: { N:50,  R:5,   d0:0.8,  epsilon:0.5, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio: 0.25 },
   should_stop2: { N:50,  R:5,   d0:0.8,  epsilon:0.25, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio: 0.25 },
-  low_lh_diff: { N:50,  R:5,   d0:0.55,  epsilon:0.2, nfreq:2, dt:0.0001, stepsPerFrame:500, alphaRatio: 0.25 },
+  low_lh_diff: { N:50,  R:50,   d0:6,  epsilon:0.2, nfreq:2, dt:0.0001, stepsPerFrame:50, alphaRatio: 0.8 },
   sticky_stable_low_perturb: { N:200,  R:50,   d0:0.5,  epsilon:0.9, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio: 1.1 },
   sticky_stable_high_perturb: { N:200,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio: 1.1 },
 };
