@@ -36,7 +36,21 @@
     .math sup{ font-size:.75em; line-height:0; vertical-align:0.45em; }
     header .eq{ margin-top:8px; }
   </style>
-  <script>window.MathJax = { tex: { inlineMath: [['$','$'], ['\(','\)']], displayMath: [['$$','$$'], ['\[','\]']] }, svg: { fontCache: 'global' } };</script>
+  <script>
+window.MathJax = {
+  options: {
+    processHtmlClass: 'mathjax',
+    ignoreHtmlClass: 'tex2jax_ignore'  // don't ignore our .mathjax block
+  },
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    tags: 'none'
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 </head>
 <body>
@@ -46,17 +60,15 @@
         <h1>Agent-Based Traffic Simulator</h1>
         <div class="sub">Simulation of multiple agents interacting via the dynamical equations discussed <a href=XXX>here</a>, and shown to the right for reference.</div>
       </div>
-            <div class="eq">
-\begin{equation}
-\ddot{\theta}_i=
-\left\{
-    \begin{array}{lr}
-        -\alpha \dot{\theta}_i & \Delta_{i}<\frac{d_o}{R}\\
-        \alpha \left(1-e^{-(R\Delta_i - d_o)} - \dot{\theta}_i\right) & \Delta_{i}\geq \frac{d_o}{R}
-    \end{array}
-    \right.
+      <div class="eq mathjax">
+  \begin{equation}
+\ddot{\theta}_i =
+\begin{cases}
+  -\alpha \dot{\theta}_i, & \Delta_i < \frac{d_0}{R} \\
+  \alpha \left( 1 - e^{-(R\Delta_i - d_0)} - \dot{\theta}_i \right), & \Delta_i \ge \frac{d_0}{R}
+\end{cases}
 \end{equation}
-        </div>
+      </div>
     </header>
 
     <section class="top">
@@ -86,8 +98,9 @@
               <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation">Reset</button>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
-              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkShowRef" checked /> show <span class="math">$\theta_i(t) − \Omega_{eq}t$</span> ring </label>
-              </div>
+              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkShowRef" checked /> show θᵢ(t) − Ωₑᵩt ring</label>
+              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkPhase" checked /> show two-phase classification</label>
+            </div>
           </div>
         </div>
       </div>
@@ -116,8 +129,7 @@
     </section>
 
     <footer>
-      <div>Built from your MATLAB model to a single-file static app. Host it free on <a href="#" id="howHost">GitHub Pages</a> / Netlify / Vercel.</div>
-      <div>© 2025</div>
+      <div>Tristan Ursell, PhD © 2025</div>
     </footer>
   </div>
 
@@ -141,6 +153,9 @@
     const inpDt = document.getElementById('inpDt'), inpSteps = document.getElementById('inpSteps'), inpAlphaRatio = document.getElementById('inpAlphaRatio');
     const btnStart = document.getElementById('btnStart'), btnStop = document.getElementById('btnStop') || document.getElementById('btnPause'), btnReset = document.getElementById('btnReset');
     const chkShowRef = document.getElementById('chkShowRef');
+    const chkPhase = document.getElementById('chkPhase');
+    const showRefRing = () => (!chkShowRef || chkShowRef.checked);
+    const showPhase  = () => (!chkPhase   || chkPhase.checked);
     let rafId = null; // track current requestAnimationFrame so resets don't create multiple loops
 
     // Canvas fit/clear/size
@@ -160,8 +175,7 @@
         const c=str[i];
         if(c==='_'||c==='^'){
           const k=c; i++; let t="";
-          if(str[i]==='{'){ i++; const j=str.indexOf('}',i); t=(j>-1?str.slice(i,j):str.slice(i)); i=(j>-1?j+1:str.length);}
-          else { t=str[i]||""; i++; }
+          if(str[i]==='{'){ i++; const j=str.indexOf('}',i); t=(j>-1?str.slice(i,j):str.slice(i)); i=(j>-1?j+1:str.length);} else { t=str[i]||""; i++; }
           r.push({text:t,kind:k==='_'?'sub':'sup'});
         } else {
           let j=i; while(j<str.length && str[j]!== '_' && str[j]!== '^') j++;
@@ -319,13 +333,17 @@
       let phi_l=0,phi_h=0; if(isFinite(rhoL)&&rhoH>rhoL){ phi_l=(TWO_PI*rhoH-state.N)/(rhoH-rhoL); phi_h=TWO_PI-phi_l; phi_l=clamp(phi_l,0,TWO_PI); phi_h=clamp(phi_h,0,TWO_PI);} 
 
       drawCircle(cxL,cy,baseR);
-      if(phi_h>0) fillWedge(cxL,cy,baseR,phi1-phi_h/2,phi1+phi_h/2,"rgba(220,70,70,0.32)");
-      if(phi_l>0) fillWedge(cxL,cy,baseR,(phi1-Math.PI)-phi_l/2,(phi1-Math.PI)+phi_l/2,"rgba(70,190,100,0.32)");
+      if (showPhase()) {
+        if(phi_h>0) fillWedge(cxL,cy,baseR,phi1-phi_h/2,phi1+phi_h/2,"rgba(220,70,70,0.32)");
+        if(phi_l>0) fillWedge(cxL,cy,baseR,(phi1-Math.PI)-phi_l/2,(phi1-Math.PI)+phi_l/2,"rgba(70,190,100,0.32)");
+      }
 
       // traveling marker + mean angle marker
-      const rVG=baseR*1.1;
-      ctxMain.beginPath(); ctxMain.arc(cxL+rVG*Math.cos(state.thetaVG), cy+rVG*Math.sin(state.thetaVG),4.5,0,TWO_PI); ctxMain.fillStyle="#8a93a8"; ctxMain.fill();
-      ctxMain.beginPath(); ctxMain.arc(cxL+baseR*r1*Math.cos(phi1), cy+baseR*r1*Math.sin(phi1),5.5,0,TWO_PI); ctxMain.fillStyle="#53f79e"; ctxMain.fill();
+      if (showPhase()) {
+        const rVG=baseR*1.1;
+        ctxMain.beginPath(); ctxMain.arc(cxL+rVG*Math.cos(state.thetaVG), cy+rVG*Math.sin(state.thetaVG),4.5,0,TWO_PI); ctxMain.fillStyle="#8a93a8"; ctxMain.fill();
+        ctxMain.beginPath(); ctxMain.arc(cxL+baseR*r1*Math.cos(phi1), cy+baseR*r1*Math.sin(phi1),5.5,0,TWO_PI); ctxMain.fillStyle="#53f79e"; ctxMain.fill();
+      }
 
       // agent dots (left)
       for(let k=0;k<state.N;k++){
@@ -334,7 +352,7 @@
       }
 
       // reference ring with Ω_eq removing uniform drift (right)
-      if(state.OmegaEq>0 && chkShowRef.checked && pxOff>baseR*.2){
+      if(state.OmegaEq>0 && showRefRing() && pxOff>baseR*.2){
         drawCircle(cxR,cy,baseR);
         for(let k=0;k<state.N;k++){
           const x=cxR+baseR*Math.cos(state.theta[k]-state.OmegaEq*state.t), y=cy+baseR*Math.sin(state.theta[k]-state.OmegaEq*state.t);
@@ -343,7 +361,7 @@
       }
 
       drawMathText(ctxMain,"θ_{i}(t)",cxL-8,cy-8,{size:FONT_PX,align:'left'});
-      if(state.OmegaEq>0 && chkShowRef.checked && pxOff>baseR*.2)
+      if(state.OmegaEq>0 && showRefRing() && pxOff>baseR*.2)
         drawMathText(ctxMain,"θ_{i}(t) − Ω_{eq} t",cxR-30,cy-8,{size:FONT_PX,align:'left'});
     }
 
@@ -457,13 +475,13 @@
       drawMathText(ctxTime,"t (Ω_{max}^{-1})",W/2,H-8,{size:FONT_PX,align:'center'});
       ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{eq})/Ω_{eq}":"RMS(ω−Ω_{eq})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
       // place ⟨J⟩ to the right of tick labels so it doesn't overlap the axis
-const rightTickStrings = niceTicks(rmin-rpad,rmax+rpad,5).map(v=>String(+v.toFixed(2)).replace(/\.00$/,""));
-ctxTime.font = `${12}px system-ui, -apple-system, Segoe UI, Roboto`;
-let maxRightW = 0; for(const s of rightTickStrings){ const w = ctxTime.measureText(s).width; if(w>maxRightW) maxRightW = w; }
-const labelX = RIGHT + 8 + maxRightW + 24; // tick label start + widest label + margin
-ctxTime.save(); ctxTime.translate(labelX,H/2); ctxTime.rotate(-Math.PI/2);
-drawMathText(ctxTime,"⟨J⟩",0,0,{size:FONT_PX,align:'center',color:'#f5a14b'});
-ctxTime.restore();
+      const rightTickStrings = niceTicks(rmin-rpad,rmax+rpad,5).map(v=>String(+v.toFixed(2)).replace(/\.00$/,""));
+      ctxTime.font = `${12}px system-ui, -apple-system, Segoe UI, Roboto`;
+      let maxRightW = 0; for(const s of rightTickStrings){ const w = ctxTime.measureText(s).width; if(w>maxRightW) maxRightW = w; }
+      const labelX = RIGHT + 8 + maxRightW + 24; // tick label start + widest label + margin
+      ctxTime.save(); ctxTime.translate(labelX,H/2); ctxTime.rotate(-Math.PI/2);
+      drawMathText(ctxTime,"⟨J⟩",0,0,{size:FONT_PX,align:'center',color:'#f5a14b'});
+      ctxTime.restore();
     }
 
     // =========
@@ -562,6 +580,9 @@ ctxTime.restore();
     btnStart && btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; rafId = requestAnimationFrame(tick); } });
     btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } });
     btnReset && btnReset.addEventListener('click', ()=> hardReset({apply:true}) );
+    // Update visuals immediately when toggling overlays
+    chkShowRef && chkShowRef.addEventListener('change', resizeAll);
+    chkPhase  && chkPhase.addEventListener('change', resizeAll);
 
     document.getElementById('howHost')?.addEventListener('click', e=>{
       e.preventDefault();
@@ -611,6 +632,10 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
         push('constants defined', typeof AXIS_COLOR==='string' && typeof AXIS_W==='number' && typeof DASH_W==='number' && typeof FONT_PX==='number');
         push('DOT_SCALE set', Math.abs(DOT_SCALE-1.3)<1e-9, `DOT_SCALE=${DOT_SCALE}`);
         push('no accidental $1 global', typeof window.$1==='undefined');
+        push('chkShowRef exists', !!document.getElementById('chkShowRef'));
+        push('chkPhase exists', !!document.getElementById('chkPhase'));
+        push('showPhase fallback', (typeof showPhase==='function') && showPhase() === (!document.getElementById('chkPhase') || document.getElementById('chkPhase').checked));
+        push('showRefRing fallback', (typeof showRefRing==='function') && showRefRing() === (!document.getElementById('chkShowRef') || document.getElementById('chkShowRef').checked));
       }catch(e){ push('self-test error',false,e&&e.message?e.message:String(e)); }
       console.table(tests);
     })();
