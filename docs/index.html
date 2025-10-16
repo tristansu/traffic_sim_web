@@ -74,6 +74,18 @@ window.MathJax = {
     <section class="top">
       <div class="controls">
         <div class="group">
+          <!-- Preset selector (added) -->
+        <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;">
+        <label for="selPreset" style="margin:0;">Preset:</label>
+        <select id="selPreset">
+          <option value="">Custom (no preset)</option>
+          <option value="baseline">Baseline (N=50, R=5, d0=0.6)</option>
+          <option value="near_jam">Near jam (Ω_eq≈0)</option>
+          <option value="sparse_fast">Sparse fast flow</option>
+          <option value="dense_slow">Dense slow flow</option>
+          <option value="high_perturb">High perturbation</option>
+    </select>
+  </div>
           <div class="grid2">
             <div style="display:grid;gap:8px;">
               <div><label>α/α<sub>c</sub></label><input id="inpAlphaRatio" type="number" value="0.4" step="0.01" min="0" /></div>
@@ -158,6 +170,46 @@ window.MathJax = {
     const showPhase  = () => (!chkPhase   || chkPhase.checked);
     let rafId = null; // track current requestAnimationFrame so resets don't create multiple loops
 
+    // ===== Preset parameter selector =====
+const selPreset = document.getElementById('selPreset');
+
+const PRESETS = {
+  baseline:     { N:50,  R:5,   d0:0.6,  epsilon:0.1, nfreq:3, dt:0.0005, stepsPerFrame:120, alphaRatio:0.4 },
+  near_jam:     { N:120, R:5,   d0:0.63, epsilon:0.05,nfreq:2, dt:0.0005, stepsPerFrame:120, alphaRatio:0.5 }, // R*2π/N ≲ d0
+  sparse_fast:  { N:30,  R:6,   d0:0.4,  epsilon:0.05,nfreq:2, dt:0.0005, stepsPerFrame:120, alphaRatio:0.6 },
+  dense_slow:   { N:120, R:5,   d0:0.6,  epsilon:0.08,nfreq:4, dt:0.0005, stepsPerFrame:120, alphaRatio:0.3 },
+  high_perturb: { N:50,  R:5,   d0:0.6,  epsilon:0.3, nfreq:7, dt:0.0005, stepsPerFrame:120, alphaRatio:0.4 },
+};
+
+function setInputsFromPreset(p) {
+  if (!p) return;
+  inpN.value = p.N;
+  inpR.value = p.R;
+  inpd0.value = p.d0;
+  inpEps.value = p.epsilon;
+  inpNfreq.value = p.nfreq;
+  inpDt.value = p.dt;
+  inpSteps.value = p.stepsPerFrame;
+  inpAlphaRatio.value = p.alphaRatio;
+}
+
+function applySelectedPreset(key) {
+  const p = PRESETS[key];
+  if (!p) return;
+  setInputsFromPreset(p);
+  hardReset({ apply: true }); // re-read inputs, recompute, re-init arrays, and restart if it was running
+}
+
+selPreset && selPreset.addEventListener('change', () => {
+  const key = selPreset.value;
+  if (key) applySelectedPreset(key);
+});
+
+// Make the dropdown reflect "Custom" if the user edits any numeric field after choosing a preset
+const numericInputs = [inpN, inpR, inpd0, inpEps, inpNfreq, inpDt, inpSteps, inpAlphaRatio];
+numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPreset) selPreset.value = ''; }));
+
+    
   function syncRefCheckbox(){
     if (!chkShowRef) return;
     const disable = state.OmegaEq <= 0;
@@ -624,7 +676,13 @@ window.MathJax = {
 Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`);
     });
 
-    applyParams({restartIfNChanged:false}); forceInitialCheckboxes(); initArrays(); saveUIFromState(); resizeAll(); initDragResize();
+    applyParams({restartIfNChanged:false}); 
+    forceInitialCheckboxes(); 
+    initArrays(); 
+    saveUIFromState(); 
+    resizeAll(); 
+    initDragResize();
+    if (selPreset) selPreset.value = '';
     window.addEventListener('resize', resizeAll);
 
     // =================
