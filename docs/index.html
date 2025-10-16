@@ -551,7 +551,9 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
 
     function drawDeltaChart(dth){
       const {W,H}=prepCanvas(cnvDelta,ctxDelta);
-      const LEFT=72, RIGHT=W-16, TOP=10, BOTTOM=H-30;
+      const LEFT=72, RIGHT=W-16, TITLE_Y=20, TOP=TITLE_Y+25, BOTTOM=H-30;
+      const deltaVal = TWO_PI / state.N;
+      drawMathText(ctxDelta, `Δ^{*} = 2π/N = ${deltaVal.toFixed(4)}`, W/2, TITLE_Y, { size: FONT_PX, align: "center" });
 
       // axes
       ctxDelta.strokeStyle=AXIS_COLOR; ctxDelta.lineWidth=AXIS_W;
