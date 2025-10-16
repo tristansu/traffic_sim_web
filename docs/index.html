@@ -258,7 +258,7 @@ window.MathJax = {
       state.R=parseFloat(inpR.value||"5");
       state.d0=parseFloat(inpd0.value||"0.6");
       state.epsilon=parseFloat(inpEps.value||"0.1");
-      state.nfreq=parseInt(inpNfreq.value||"7");
+      state.nfreq=parseFloat(inpNfreq.value||"7");
       state.dt=parseFloat(inpDt.value||"0.0005");
       let spf=Math.round(+inpSteps.value); state.stepsPerFrame = (Number.isFinite(spf)&&spf>0)?spf:1;
       state.alphaRatio=parseFloat(inpAlphaRatio.value||"0.4");
