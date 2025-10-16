@@ -7,7 +7,7 @@
   <style>
     :root { --bg:#0e0f12; --panel:#14161b; --muted:#828aa0; --text:#e8ebf2; --accent:#6ee7ff; --accent2:#a78bfa; --good:#86efac; --warn:#fbbf24; --danger:#fb7185; --grid-gap:14px; --radius:14px; --card-w:560px; --w-polar:660px; --h-polar:360px; --w-omega:660px; --h-omega:300px; --w-delta:660px; --h-delta:300px; --w-time:660px; --h-time:300px; }
     *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji;color:var(--text);background:radial-gradient(1200px 800px at 40% -200px,#1b1f2b 0%,var(--bg) 60%)}
-    .shell{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto 1fr auto;gap:var(--grid-gap);min-height:100vh;padding:16px 16px 20px}
+    .shell{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto auto 1fr auto;gap:var(--grid-gap);min-height:100vh;padding:16px 16px 20px}
     header,footer{grid-column:1/-1;background:linear-gradient(180deg,#171923 0%,#11131a 100%);border:1px solid #222633;border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(0,0,0,.25)}
     header h1{font-size:18px;margin:0;font-weight:600;letter-spacing:.2px} header .sub{color:var(--muted);font-size:12px}
     .left,.top{background:var(--panel);border:1px solid #222633;border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.25);padding:12px}
@@ -64,19 +64,22 @@ window.MathJax = {
     <header>
       <div>
         <h1>Agent-Based Traffic Simulator</h1>
-        <div class="sub">Simulation of multiple agents interacting via the dynamical equations discussed <a href=XXX>here</a>, and shown to the right for reference.</div>
-      </div>
-      <div class="eq mathjax">
-  \begin{equation}
-\ddot{\theta}_i =
-\begin{cases}
-  -\alpha \dot{\theta}_i, & \Delta_i < \frac{d_0}{R} \\
-  \alpha \left( 1 - e^{-(R\Delta_i - d_0)} - \dot{\theta}_i \right), & \Delta_i \ge \frac{d_0}{R}
-\end{cases}
-\end{equation}
+        <div class="sub">Simulation of multiple agents interacting via the dynamical equations discussed <a href=XXX>here</a>, and shown below for reference.</div>
       </div>
     </header>
+    <section class="eqpane">
+    <div class="eq mathjax">
+      \begin{equation}
+      \ddot{\theta}_i =
+      \begin{cases}
+      -\alpha \dot{\theta}_i, & \Delta_i < \frac{d_0}{R} \\
+      \alpha \left( 1 - e^{-(R\Delta_i - d_0)} - \dot{\theta}_i \right), & \Delta_i \ge \frac{d_0}{R}
+      \end{cases}
+      \end{equation}
+  </div>
+</section>
 
+    
     <section class="top">
       <div class="controls">
         <div class="group">
