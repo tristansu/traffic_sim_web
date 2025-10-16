@@ -36,15 +36,14 @@
   <div class="shell">
     <header>
       <div>
-        <h1>Simple Traffic Model (Ring Road) — Interactive</h1>
-        <div class="sub">Real-time sim, adjustable parameters, restart on the fly.</div>
+        <h1>Agent-Based Traffic Model</h1>
+        <div class="sub">Simulation of multiple agents interacting via the dnyamical equations discussed <a href=XXX>here</a>.</div>
       </div>
     </header>
 
     <section class="top">
       <div class="controls">
         <div class="group">
-          <h3>Simulation</h3>
           <div class="grid2">
             <div style="display:grid;gap:8px;">
               <div><label>α/α<sub>c</sub></label><input id="inpAlphaRatio" type="number" value="0.4" step="0.01" min="0" /></div>
@@ -62,7 +61,6 @@
         </div>
 
         <div class="group">
-          <h3>Dynamics</h3>
           <div style="margin-top:8px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
             <div class="btnRow" style="display:flex;gap:12px;">
               <button id="btnStart" class="primary">Start</button>
@@ -147,7 +145,7 @@
           else { t=str[i]||""; i++; }
           r.push({text:t,kind:k==='_'?'sub':'sup'});
         } else {
-          let j=i; while(j<str.length && str[j]!=='_' && str[j]!=='^') j++;
+          let j=i; while(j<str.length && str[j]!== '_' && str[j]!== '^') j++;
           r.push({text:str.slice(i,j),kind:'norm'}); i=j;
         }
       } return r;
@@ -426,61 +424,20 @@
     }
 
     function drawTimeSeries(){
-      const show=chkShowCharts.checked; cnvTime.style.display=show?'block':'none'; if(!show) return;
-      const tArr=state.timeSeries.t; if(tArr.length<2) { const _=prepCanvas(cnvTime,ctxTime); return; }
-
-      const {W,H}=prepCanvas(cnvTime,ctxTime);
-      const LEFT=40, RIGHT=W-40, TOP=10, BOTTOM=H-30;
-
-      // axes + right axis guide
-      ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W;
-      ctxTime.beginPath();
-      ctxTime.moveTo(LEFT,BOTTOM);  ctxTime.lineTo(RIGHT,BOTTOM);
-      ctxTime.moveTo(LEFT,TOP);     ctxTime.lineTo(LEFT,BOTTOM);
-      ctxTime.moveTo(RIGHT,TOP);    ctxTime.lineTo(RIGHT,BOTTOM);
-      ctxTime.stroke();
-
-      const tmin=tArr[0], tmax=tArr[tArr.length-1];
-      const mapX=v=> LEFT + ((v-tmin)/(tmax-tmin))*(RIGHT-LEFT);
-
-      const L=state.timeSeries.meanOmega, R=state.timeSeries.meanFlux, d=TWO_PI/state.N;
-      const Jss=(state.R*d>state.d0)? (1-Math.exp(-(state.R*d-state.d0)))*(state.N/(TWO_PI)) : undefined;
-
-      // left axis scaling (RMS)
-      let lmin=Math.min(...L), lmax=Math.max(...L);
-      if(!isFinite(lmin)||!isFinite(lmax)){ lmin=0; lmax=1; }
-      const lpad=(lmax-lmin||1)*.15;
-      const mapY1=v=> TOP + (1-((v-(lmin-lpad))/((lmax+lpad)-(lmin-lpad))))*(H-40);
-
-      // right axis scaling (⟨J⟩)
-      let rmin=Math.min(...R), rmax=Math.max(...R);
-      if(Number.isFinite(Jss)){ rmin=Math.min(rmin,Jss); rmax=Math.max(rmax,Jss);}
-      if(!isFinite(rmin)||!isFinite(rmax)){ rmin=0; rmax=1; }
-      const rpad=(rmax-rmin||1)*.15;
-      const mapY2=v=> TOP + (1-((v-(rmin-rpad))/((rmax+rpad)-(rmin-rpad))))*(H-40);
-
+      const show=chkShowCharts.checked; cnvTime.style.display=show?'block':'none'; if(!show) return; const tArr=state.timeSeries.t; if(tArr.length<2) { const _=prepCanvas(cnvTime,ctxTime); return; }
+      const {W,H}=prepCanvas(cnvTime,ctxTime); const LEFT=40, RIGHT=W-40, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
+      const tmin=tArr[0], tmax=tArr[tArr.length-1], mapX=v=> LEFT + ((v-tmin)/(tmax-tmin))*(RIGHT-LEFT);
+      const L=state.timeSeries.meanOmega, R=state.timeSeries.meanFlux, d=TWO_PI/state.N; const Jss=(state.R*d>state.d0)? (1-Math.exp(-(state.R*d-state.d0)))*(state.N/(TWO_PI)) : undefined;
+      let lmin=Math.min(...L), lmax=Math.max(...L); if(!isFinite(lmin)||!isFinite(lmax)){ lmin=0; lmax=1; } const lpad=(lmax-lmin||1)*.15; const mapY1=v=> TOP + (1-((v-(lmin-lpad))/((lmax+lpad)-(lmin-lpad))))*(H-40);
+      let rmin=Math.min(...R), rmax=Math.max(...R); if(Number.isFinite(Jss)){ rmin=Math.min(rmin,Jss); rmax=Math.max(rmax,Jss);} if(!isFinite(rmin)||!isFinite(rmax)){ rmin=0; rmax=1; } const rpad=(rmax-rmin||1)*.15; const mapY2=v=> TOP + (1-((v-(rmin-rpad))/((rmax+rpad)-(rmin-rpad))))*(H-40);
       drawLeftTicks(ctxTime,LEFT,TOP,BOTTOM,niceTicks(lmin-lpad,lmax+lpad,5),mapY1,AXIS_COLOR);
       drawRightTicks(ctxTime,RIGHT,TOP,BOTTOM,niceTicks(rmin-rpad,rmax+rpad,5),mapY2,"#f5a14b");
-
-      // RMS(ω−Ω_eq)/Ω_eq
-      ctxTime.strokeStyle="#6bb7ff"; ctxTime.lineWidth=2; ctxTime.beginPath();
-      for(let i=0;i<L.length;i++){ const x=mapX(tArr[i]), y=mapY1(L[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
-
-      // ⟨J⟩
-      ctxTime.strokeStyle="#f5a14b"; ctxTime.lineWidth=2; ctxTime.beginPath();
-      for(let i=0;i<R.length;i++){ const x=mapX(tArr[i]), y=mapY2(R[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
-
-      // dashed J_ss
-      if(Number.isFinite(Jss)){
-        ctxTime.setLineDash([6,6]); ctxTime.lineWidth=DASH_W; ctxTime.strokeStyle="#f5a14b";
-        const yRef=mapY2(Jss); ctxTime.beginPath(); ctxTime.moveTo(LEFT,yRef); ctxTime.lineTo(RIGHT,yRef); ctxTime.stroke(); ctxTime.setLineDash([]);
-      }
-
+      ctxTime.strokeStyle="#6bb7ff"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<L.length;i++){ const x=mapX(tArr[i]), y=mapY1(L[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
+      ctxTime.strokeStyle="#f5a14b"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<R.length;i++){ const x=mapX(tArr[i]), y=mapY2(R[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
+      if(Number.isFinite(Jss)){ ctxTime.setLineDash([6,6]); ctxTime.lineWidth=DASH_W; ctxTime.strokeStyle="#f5a14b"; const yRef=mapY2(Jss); ctxTime.beginPath(); ctxTime.moveTo(LEFT,yRef); ctxTime.lineTo(RIGHT,yRef); ctxTime.stroke(); ctxTime.setLineDash([]); }
       drawMathText(ctxTime,"t (Ω_{max}^{-1})",W/2,H-8,{size:FONT_PX,align:'center'});
-      ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2);
-      drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{eq})/Ω_{eq}":"RMS(ω−Ω_{eq})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
-      ctxTime.save(); ctxTime.translate(RIGHT+18,H/2); ctxTime.rotate(-Math.PI/2);
-      drawMathText(ctxTime,"⟨J⟩",0,0,{size:FONT_PX,align:'center',color:'#f5a14b'}); ctxTime.restore();
+      ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{eq})/Ω_{eq}":"RMS(ω−Ω_{eq})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
+      ctxTime.save(); ctxTime.translate(RIGHT+18,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime,"⟨J⟩",0,0,{size:FONT_PX,align:'center',color:'#f5a14b'}); ctxTime.restore();
     }
 
     // =========
@@ -528,12 +485,12 @@
         if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; syncCanvasSizes(); resizeAll(); }
       });
       wrap.addEventListener('dragover', e=>{
-        e.preventDefault(); try{ e.dataTransfer.dropEffect='move'; }catch(_){}
+        e.preventDefault(); try{ e.dataTransfer.dropEffect='move'; }catch(_){ }
         const after=getDragAfterElement(wrap,e.clientX,e.clientY);
         const dragging=wrap.querySelector('.dragging'); if(!dragging) return;
         if(after==null) wrap.appendChild(dragging); else wrap.insertBefore(dragging,after);
       });
-      wrap.addEventListener('dragenter', e=>{ e.preventDefault(); try{ e.dataTransfer.dropEffect='move'; }catch(_){} });
+      wrap.addEventListener('dragenter', e=>{ e.preventDefault(); try{ e.dataTransfer.dropEffect='move'; }catch(_){ } });
       wrap.addEventListener('drop', e=>{
         e.preventDefault();
         const dragging=wrap.querySelector('.dragging'); if(!dragging) return;
