@@ -174,7 +174,7 @@ window.MathJax = {
 const selPreset = document.getElementById('selPreset');
 
 const PRESETS = {
-  baseline:     { N:50,  R:5,   d0:0.6,  epsilon:0.1, nfreq:3, dt:0.0005, stepsPerFrame:120, alphaRatio:0.4 },
+  baseline:     { N:50,  R:5,   d0:0.5,  epsilon:0.5, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio:0.5 },
   near_jam:     { N:120, R:5,   d0:0.63, epsilon:0.05,nfreq:2, dt:0.0005, stepsPerFrame:120, alphaRatio:0.5 }, // R*2π/N ≲ d0
   sparse_fast:  { N:30,  R:6,   d0:0.4,  epsilon:0.05,nfreq:2, dt:0.0005, stepsPerFrame:120, alphaRatio:0.6 },
   dense_slow:   { N:120, R:5,   d0:0.6,  epsilon:0.08,nfreq:4, dt:0.0005, stepsPerFrame:120, alphaRatio:0.3 },
@@ -211,19 +211,23 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
 
     
   function syncRefCheckbox(){
-    if (!chkShowRef) return;
-    const disable = state.OmegaEq <= 0;
-    chkShowRef.disabled = disable;
-    if (disable) chkShowRef.checked = false;
+  if (!chkShowRef) return;
+  const allow = state.OmegaEq > 0;
 
-    // optional visual gray-out
-    const lbl = chkShowRef.closest('label');
-    if (lbl) {
-      lbl.style.opacity = disable ? 0.5 : 1;
-      lbl.style.cursor  = disable ? 'not-allowed' : 'pointer';
-      lbl.title = disable ? 'Disabled when Ω_eq ≤ 0' : '';
-    }
+  // Enforce desired behavior:
+  // - If allowed (Ω_eq>0): enable + CHECKED
+  // - If not allowed (Ω_eq<=0): disable + UNCHECKED
+  chkShowRef.disabled = !allow;
+  chkShowRef.checked  = allow ? true : false;
+
+  // optional visual gray-out
+  const lbl = chkShowRef.closest('label');
+  if (lbl) {
+    lbl.style.opacity = allow ? 1 : 0.5;
+    lbl.style.cursor  = allow ? 'pointer' : 'not-allowed';
+    lbl.title = allow ? '' : 'Disabled when Ω_eq ≤ 0';
   }
+}
     // Canvas fit/clear/size
     function prepCanvas(canvas, ctx){
       const dpr = window.devicePixelRatio||1;
