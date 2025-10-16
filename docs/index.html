@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Traffic Model Simulator</title>
+  <style>
+    :root { --bg:#0e0f12; --panel:#14161b; --muted:#828aa0; --text:#e8ebf2; --accent:#6ee7ff; --accent2:#a78bfa; --good:#86efac; --warn:#fbbf24; --danger:#fb7185; --grid-gap:14px; --radius:14px; --card-w:560px; --w-polar:660px; --h-polar:380px; --w-omega:660px; --h-omega:300px; --w-delta:660px; --h-delta:300px; --w-time:660px; --h-time:300px; }
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji;color:var(--text);background:radial-gradient(1200px 800px at 40% -200px,#1b1f2b 0%,var(--bg) 60%)}
+    .shell{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto 1fr auto;gap:var(--grid-gap);min-height:100vh;padding:16px 16px 20px}
+    header,footer{grid-column:1/-1;background:linear-gradient(180deg,#171923 0%,#11131a 100%);border:1px solid #222633;border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    header h1{font-size:18px;margin:0;font-weight:600;letter-spacing:.2px} header .sub{color:var(--muted);font-size:12px}
+    .left,.top{background:var(--panel);border:1px solid #222633;border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.25);padding:12px}
+    .left{display:grid;grid-template-rows:auto auto 1fr;gap:var(--grid-gap)} .canvasWrap{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
+    .card{background:#10131a;border:1px solid #1e2330;border-radius:12px;padding:8px}
+    .canvasWrap .card{position:relative;cursor:grab;width:var(--card-w);max-width:var(--card-w);flex:0 0 var(--card-w)} .canvasWrap .card.dragging{cursor:grabbing} .card.dragging{opacity:.65;outline:2px dashed #3b82f6}
+    .card[data-id="polar"]{--card-w:var(--w-polar);height:var(--h-polar)} .card[data-id="omega"]{--card-w:var(--w-omega);height:var(--h-omega)} .card[data-id="delta"]{--card-w:var(--w-delta);height:var(--h-delta)} .card[data-id="time"]{--card-w:var(--w-time);height:var(--h-time)}
+    .resizable{min-width:280px;min-height:180px} .resizer{position:absolute;right:6px;bottom:6px;width:14px;height:14px;cursor:se-resize;border-radius:4px;border:1px solid #3a4359;background:linear-gradient(135deg,rgba(255,255,255,.18) 0 40%,rgba(255,255,255,0) 40%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+    .card[data-id="polar"] .cardTitle{font-weight:400;text-align:center}
+    canvas{width:100%;height:auto;display:block;background:#0c0f15;border-radius:10px}
+    .top{display:grid;grid-template-rows:auto;gap:var(--grid-gap);margin-bottom:-10px}
+    .controls{display:grid;gap:8px} .grid2{display:grid;grid-template-columns:max-content max-content;column-gap:16px;row-gap:8px;justify-content:start;align-items:start}
+    .group{background:#0f1218;border:1px solid #222633;border-radius:10px;padding:10px}
+    .group h3{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+    label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+    input[type=number],select{width:100%;background:#0b0e13;color:var(--text);border:1px solid #232837;border-radius:8px;padding:8px 10px;outline:none}
+    .top .group input[type=number]{width:100px}
+    .btnRow{display:flex;gap:8px;flex-wrap:wrap}
+    button{background:linear-gradient(180deg,#1c2633 0%,#141b24 100%);color:var(--text);border:1px solid #253042;border-radius:10px;padding:10px 12px;font-weight:600;font-size:13px;cursor:pointer;transition:transform .06s ease,filter .12s ease,background .12s ease}
+    button:hover{filter:brightness(1.05)} button:active{transform:translateY(1px)} .primary{border-color:#3b82f6;background:linear-gradient(180deg,#1f2e47 0%,#152135 100%)} .danger{border-color:#be123c;background:linear-gradient(180deg,#3a1923 0%,#2a1017 100%)} .muted{background:#0d1117;border-color:#1f2431}
+    footer{font-size:12px;color:var(--muted)} a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+    @media (max-width:1100px){.shell{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <h1>Simple Traffic Model (Ring Road) — Interactive</h1>
+        <div class="sub">Real‑time sim, adjustable parameters, restart on the fly.</div>
+      </div>
+    </header>
+
+    <section class="top">
+      <div class="controls">
+        <div class="group">
+          <h3>Simulation</h3>
+          <div class="grid2">
+            <div style="display:grid;gap:8px;">
+              <div><label>α/α<sub>c</sub></label><input id="inpAlphaRatio" type="number" value="0.4" step="0.01" min="0" /></div>
+              <div><label for="inpN">N (cars)</label><input id="inpN" type="number" value="50" min="3" max="500" step="1" /></div>
+              <div><label for="inpR">R (ring radius)</label><input id="inpR" type="number" value="5" step="0.1" /></div>
+              <div><label for="inpd0">d₀ (stop distance)</label><input id="inpd0" type="number" value="0.6" step="0.01" /></div>
+            </div>
+            <div style="display:grid;gap:8px;">
+              <div><label for="inpEps">ε (angle perturbation)</label><input id="inpEps" type="number" value="0.1" step="0.01" /></div>
+              <div><label for="inpNfreq">n (perturb freq)</label><input id="inpNfreq" type="number" value="7" step="1" /></div>
+              <div><label for="inpDt">Δt (sim step)</label><input id="inpDt" type="number" value="0.0005" step="0.0001" /></div>
+              <div><label for="inpSteps">Steps / frame</label><input id="inpSteps" type="number" value="120" step="1" /></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>Dynamics</h3>
+          <div style="margin-top:8px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+            <div class="btnRow" style="display:flex;gap:12px;">
+              <button id="btnStart" class="primary">Start</button>
+              <button id="btnPause" class="muted">Pause</button>
+              <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation">Apply Params & Reset</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
+              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkShowRef" checked /> show Ω<sub>eq</sub> ring</label>
+              <label style="display:inline-flex;align-items:center;gap:8px;"><input type="checkbox" id="chkShowCharts" checked /> Show charts</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="left">
+      <div class="canvasWrap" id="canvasWrap">
+        <div class="card draggable resizable" data-id="polar" draggable="true">
+          <div class="cardTitle"><span id="titlePolar">T (Ω<sub>max</sub><sup>-1</sup>) = 0.0</span></div>
+          <canvas id="canvasMain"></canvas>
+          <div class="resizer" title="Drag to resize"></div>
+        </div>
+        <div class="card draggable resizable" data-id="omega" draggable="true">
+          <canvas id="canvasOmega"></canvas>
+          <div class="resizer" title="Drag to resize"></div>
+        </div>
+        <div class="card draggable resizable" data-id="delta" draggable="true">
+          <canvas id="canvasDelta"></canvas>
+          <div class="resizer" title="Drag to resize"></div>
+        </div>
+        <div class="card draggable resizable" data-id="time" draggable="true">
+          <canvas id="canvasTime"></canvas>
+          <div class="resizer" title="Drag to resize"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>Built from your MATLAB model to a single‑file static app. Host it free on <a href="#" id="howHost">GitHub Pages</a> / Netlify / Vercel.</div>
+      <div>© 2025</div>
+    </footer>
+  </div>
+
+  <script>
+    // ==== Constants & DOM ====
+    const TWO_PI = Math.PI*2;
+    const AXIS_COLOR = "#cfd3dc", AXIS_W = 3, DASH_W = 2, FONT_PX = 16;
+    const main = document.getElementById('canvasMain'), ctxMain = main.getContext('2d');
+    const cnvOmega = document.getElementById('canvasOmega'), ctxOmega = cnvOmega.getContext('2d');
+    const cnvDelta = document.getElementById('canvasDelta'), ctxDelta = cnvDelta.getContext('2d');
+    const cnvTime  = document.getElementById('canvasTime'),  ctxTime  = cnvTime.getContext('2d');
+    const wrap = document.getElementById('canvasWrap');
+    const titlePolar = document.getElementById('titlePolar');
+    const inpN = document.getElementById('inpN'), inpR = document.getElementById('inpR'), inpd0 = document.getElementById('inpd0');
+    const inpEps = document.getElementById('inpEps'), inpNfreq = document.getElementById('inpNfreq');
+    const inpDt = document.getElementById('inpDt'), inpSteps = document.getElementById('inpSteps'), inpAlphaRatio = document.getElementById('inpAlphaRatio');
+    const btnStart = document.getElementById('btnStart'), btnPause = document.getElementById('btnPause'), btnReset = document.getElementById('btnReset');
+    const chkShowCharts = document.getElementById('chkShowCharts'), chkShowRef = document.getElementById('chkShowRef');
+
+    // ==== Canvas helpers (merged fit+clear+size) ====
+    function prepCanvas(canvas, ctx){
+      const dpr = window.devicePixelRatio||1;
+      const w = Math.max(1, Math.floor(canvas.clientWidth||canvas.width/dpr));
+      const h = Math.max(1, Math.floor(canvas.clientHeight||canvas.height/dpr));
+      const need = canvas.width!==Math.floor(w*dpr) || canvas.height!==Math.floor(h*dpr);
+      if(need){ canvas.width=Math.floor(w*dpr); canvas.height=Math.floor(h*dpr); }
+      ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+      return {W:w,H:h};
+    }
+
+    // ==== Math-text (compact) ====
+    function parseMathRuns(str){ const r=[]; for(let i=0;i<str.length;){ const c=str[i]; if(c==='_'||c==='^'){ const k=c;i++; let t=""; if(str[i]==='{'){ i++; const j=str.indexOf('}',i); t=(j>-1?str.slice(i,j):str.slice(i)); i=(j>-1?j+1:str.length);} else { t=str[i]||""; i++; } r.push({text:t,kind:k==='_'?'sub':'sup'});} else { let j=i; while(j<str.length && str[j]!=='_' && str[j]!=='^') j++; r.push({text:str.slice(i,j),kind:'norm'}); i=j; } } return r; }
+    function drawMathText(ctx,str,x,y,{size=12,align='left',color='#9aa3b7',family='system-ui, -apple-system, Segoe UI, Roboto'}={}){
+      const runs=parseMathRuns(str), subS=.75, supS=.75, subY=size*.25, supY=size*.5, fontPx=p=>`${p}px ${family}`; let w=0;
+      for(const rr of runs){ const s=rr.kind==='norm'?size:(rr.kind==='sub'?size*subS:size*supS); ctx.font=fontPx(s); w+=ctx.measureText(rr.text).width; }
+      let cx=x; if(align==='center') cx-=w/2; else if(align==='right') cx-=w; ctx.fillStyle=color;
+      for(const rr of runs){ const s=rr.kind==='norm'?size:(rr.kind==='sub'?size*subS:size*supS); const dy=rr.kind==='norm'?0:(rr.kind==='sub'?subY:-supY); ctx.font=fontPx(s); ctx.fillText(rr.text,cx,y+dy); cx+=ctx.measureText(rr.text).width; }
+    }
+
+    // ==== Utils ====
+    function syncCanvasSizes(){ document.querySelectorAll('.canvasWrap .card').forEach(card=>{ const c=card.querySelector('canvas'); if(!c) return; const cs=getComputedStyle(card); const padV=(+parseFloat(cs.paddingTop)||0)+(+parseFloat(cs.paddingBottom)||0); const padH=(+parseFloat(cs.paddingLeft)||0)+(+parseFloat(cs.paddingRight)||0); const title=card.querySelector('.cardTitle'); const titleH=title?(title.offsetHeight+6):0; c.style.height=Math.max(120,card.clientHeight-padV-titleH)+'px'; c.style.width=Math.max(200,card.clientWidth-padH)+'px'; }); }
+    function clamp(x,a,b){ return Math.max(a,Math.min(b,x)); }
+    function hsvToRgb(h,s,v){ const f=(n,k=(n+h*6)%6)=>v-v*s*Math.max(Math.min(k,4-k,1),0); return [f(5),f(3),f(1)]; }
+    function colormapHSV(N){ const arr=[]; for(let k=0;k<N;k++){ const h=k/N,[r,g,b]=hsvToRgb(h,.9,.95); arr.push(`rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`);} return arr; }
+    function complexMeanAngles(theta){ let re=0,im=0; for(const th of theta){ re+=Math.cos(th); im+=Math.sin(th);} re/=theta.length; im/=theta.length; return {r:Math.hypot(re,im),phi:Math.atan2(im,re)}; }
+    const wrapAngle=a=>{ a%=TWO_PI; return a<0?a+TWO_PI:a; };
+    function niceTicks(min,max,count=5){ if(!isFinite(min)||!isFinite(max)||min===max) return [min||0]; const span=max-min,step0=span/Math.max(1,count),p10=10**Math.floor(Math.log10(step0)),err=step0/p10; const m= err>=7.5?10: err>=3.5?5: err>=1.5?2:1; const step=m*p10,nmin=Math.floor(min/step)*step,nmax=Math.ceil(max/step)*step,t=[]; for(let v=nmin; v<=nmax+1e-12; v+=step) t.push(+v.toFixed(10)); return t; }
+    function drawLeftTicks(ctx,L,T,B,vals,mapY,color=AXIS_COLOR){ ctx.save(); ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=1.5; for(const v of vals){ const y=mapY(v); if(y<T-1||y>B+1) continue; ctx.beginPath(); ctx.moveTo(L-6,y); ctx.lineTo(L,y); ctx.stroke(); drawMathText(ctx,String(+v.toFixed(2)).replace(/\.00$/,""),L-8,y+4,{size:12,align:'right',color}); } ctx.restore(); }
+    function drawRightTicks(ctx,R,T,B,vals,mapY,color=AXIS_COLOR){ ctx.save(); ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=1.5; for(const v of vals){ const y=mapY(v); if(y<T-1||y>B+1) continue; ctx.beginPath(); ctx.moveTo(R,y); ctx.lineTo(R+6,y); ctx.stroke(); drawMathText(ctx,String(+v.toFixed(2)).replace(/\.00$/,""),R+8,y+4,{size:12,align:'left',color}); } ctx.restore(); }
+
+    // ==== State ====
+    let state={ N:50,R:5,d0:0.6,epsilon:0.1,nfreq:7,dt:0.0005, stepsPerFrame:120, alphaRatio:0.4, alpha:0, alphaC:0, OmegaEq:0, t:0, theta:[], omega:[], colors:[], thetaVG:0, timeSeries:{t:[],meanOmega:[],meanFlux:[]}, yMaxDelta:0, running:false };
+
+    // ==== Params & init ====
+    const computeAlphaC=(N,R,d0)=> 2*R*Math.exp(-(TWO_PI*R/N - d0));
+    function updateOmegaEq(){ const d=TWO_PI/state.N; state.OmegaEq = (state.R*d > state.d0) ? (1 - Math.exp(-(state.R*d - state.d0))) : 0; }
+    function initArrays(){ const {N,epsilon,nfreq}=state, d=TWO_PI/N; state.theta=new Array(N); state.omega=new Array(N); for(let i=0;i<N;i++){ state.theta[i]=i*d - epsilon*Math.sin(nfreq*i*d); state.omega[i]=state.OmegaEq; } state.colors=colormapHSV(N); state.thetaVG=0; state.timeSeries={t:[],meanOmega:[],meanFlux:[]}; state.yMaxDelta=0; state.t=0; }
+    function applyParams({restartIfNChanged=true}={}){ const prevN=state.N; state.N=Math.max(3,Math.min(2000,parseInt(inpN.value||"50"))); state.R=parseFloat(inpR.value||"5"); state.d0=parseFloat(inpd0.value||"0.6"); state.epsilon=parseFloat(inpEps.value||"0.1"); state.nfreq=parseInt(inpNfreq.value||"7"); state.dt=parseFloat(inpDt.value||"0.0005"); let spf=Math.round(+inpSteps.value); state.stepsPerFrame = (Number.isFinite(spf)&&spf>0)?spf:1; state.alphaRatio=parseFloat(inpAlphaRatio.value||"0.4"); state.alphaC=computeAlphaC(state.N,state.R,state.d0); state.alpha=state.alphaRatio*state.alphaC; updateOmegaEq(); if(restartIfNChanged && prevN!==state.N) initArrays(); }
+    function saveUIFromState(){ inpN.value=state.N; inpR.value=state.R; inpd0.value=state.d0; inpEps.value=state.epsilon; inpNfreq.value=state.nfreq; inpDt.value=state.dt; inpSteps.value=state.stepsPerFrame; inpAlphaRatio.value=state.alphaRatio; }
+
+    // ==== Dynamics ====
+    function stepOnce(){ const {N,R,d0,alpha,dt}=state; for(let i=0;i<N;i++){ state.theta[i]=wrapAngle(state.theta[i]+state.omega[i]*dt); } const dth=new Array(N); for(let i=0;i<N;i++){ let diff=state.theta[(i+1)%N]-state.theta[i]; if(diff<0) diff+=TWO_PI; dth[i]=diff; } for(let i=0;i<N;i++){ const stop=(R*dth[i])<=d0; if(stop) state.omega[i]+=dt*(-alpha*state.omega[i]); else { const term=1-Math.exp(-(R*dth[i]-d0)); state.omega[i]+=dt*alpha*(term-state.omega[i]); } if(state.omega[i]<0 && state.omega[i]>-1e-12) state.omega[i]=0; } return dth; }
+
+    function computeFluxAndStats(dth){ const N=state.N; let meanJ=0,sumSq=0; for(let i=0;i<N;i++){ const prev=(i-1+N)%N; const denom=Math.max(0.5*(dth[i]+dth[prev]),1e-6); const J=state.omega[i]/denom; meanJ+=J; const d=(state.omega[i]-state.OmegaEq); sumSq+=d*d; } meanJ/=N; const rmsOmega=Math.sqrt(sumSq/N); let rhoH=0,rhoL=Infinity; for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d); } const omegaL=Math.max(...state.omega); let vg=0; if(isFinite(rhoL)&&rhoH>0&&rhoL<rhoH) vg = omegaL*(rhoL/rhoH)/(1-(rhoL/rhoH)); state.thetaVG=wrapAngle(state.thetaVG - vg*state.dt*state.stepsPerFrame); return {meanJ,rmsOmega}; }
+
+    // ==== Drawing ====
+    function drawMain(dth){ const {W,H}=prepCanvas(main,ctxMain); const baseR=Math.min(W*.38,H*.42); let pxOff=2.5*baseR; const maxOff=Math.max(0,W-baseR*2.2); if(pxOff>maxOff) pxOff=maxOff; const cxL=Math.min(W*.30,W/2 - pxOff/2), cy=H/2, cxR=cxL+pxOff; const drawCircle=(cx,cy,r,col="#2b3245")=>{ ctxMain.beginPath(); ctxMain.arc(cx,cy,r,0,TWO_PI); ctxMain.strokeStyle=col; ctxMain.lineWidth=1.3; ctxMain.stroke(); };
+      const fillWedge=(cx,cy,r,a0,a1,col)=>{ ctxMain.beginPath(); ctxMain.moveTo(cx,cy); ctxMain.arc(cx,cy,r,a0,a1,false); ctxMain.closePath(); ctxMain.fillStyle=col; ctxMain.fill(); };
+      const {r:r1,phi:phi1}=complexMeanAngles(state.theta); let rhoH=0,rhoL=Infinity; for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d);} let phi_l=0,phi_h=0; if(isFinite(rhoL)&&rhoH>rhoL){ phi_l=(TWO_PI*rhoH-state.N)/(rhoH-rhoL); phi_h=TWO_PI-phi_l; phi_l=clamp(phi_l,0,TWO_PI); phi_h=clamp(phi_h,0,TWO_PI);} drawCircle(cxL,cy,baseR);
+      if(phi_h>0) fillWedge(cxL,cy,baseR,phi1-phi_h/2,phi1+phi_h/2,"rgba(220,70,70,0.32)"); if(phi_l>0) fillWedge(cxL,cy,baseR,(phi1-Math.PI)-phi_l/2,(phi1-Math.PI)+phi_l/2,"rgba(70,190,100,0.32)");
+      const rVG=baseR*1.1; ctxMain.beginPath(); ctxMain.arc(cxL+rVG*Math.cos(state.thetaVG), cy+rVG*Math.sin(state.thetaVG),4.5,0,TWO_PI); ctxMain.fillStyle="#8a93a8"; ctxMain.fill(); ctxMain.beginPath(); ctxMain.arc(cxL+baseR*r1*Math.cos(phi1), cy+baseR*r1*Math.sin(phi1),5.5,0,TWO_PI); ctxMain.fillStyle="#53f79e"; ctxMain.fill();
+      for(let k=0;k<state.N;k++){ const x=cxL+baseR*Math.cos(state.theta[k]), y=cy+baseR*Math.sin(state.theta[k]); ctxMain.beginPath(); ctxMain.arc(x,y,4.2,0,TWO_PI); ctxMain.fillStyle=state.colors[k]; ctxMain.fill(); }
+      if(state.OmegaEq>0 && chkShowRef.checked && pxOff>baseR*.2){ drawCircle(cxR,cy,baseR); for(let k=0;k<state.N;k++){ const x=cxR+baseR*Math.cos(state.theta[k]-state.OmegaEq*state.t), y=cy+baseR*Math.sin(state.theta[k]-state.OmegaEq*state.t); ctxMain.beginPath(); ctxMain.arc(x,y,4,0,TWO_PI); ctxMain.fillStyle=state.colors[k]; ctxMain.fill(); } }
+      drawMathText(ctxMain,"θ_{i}(t)",cxL-8,cy-8,{size:FONT_PX,align:'left'}); if(state.OmegaEq>0 && chkShowRef.checked && pxOff>baseR*.2) drawMathText(ctxMain,"θ_{i}(t) − Ω_{eq} t",cxR-30,cy-8,{size:FONT_PX,align:'left'});
+    }
+
+    function drawAgentCharts(){ const {W,H}=prepCanvas(cnvOmega,ctxOmega); const LEFT=40, RIGHT=W-10, TITLE_Y=20, TOP=TITLE_Y+25, BOTTOM=H-30;
+      ctxOmega.strokeStyle=AXIS_COLOR; ctxOmega.lineWidth=AXIS_W; ctxOmega.beginPath(); ctxOmega.moveTo(LEFT,BOTTOM); ctxOmega.lineTo(RIGHT,BOTTOM); ctxOmega.moveTo(LEFT,TOP); ctxOmega.lineTo(LEFT,BOTTOM); ctxOmega.stroke();
+      drawMathText(ctxOmega,`Ω_{eq} = ${state.OmegaEq.toFixed(4)}`,W/2,TITLE_Y,{size:FONT_PX,align:'center'});
+      ctxOmega.strokeStyle="#8a93a8"; ctxOmega.setLineDash([5,6]); ctxOmega.lineWidth=DASH_W; ctxOmega.beginPath(); const yOeq=TOP+(1-(state.OmegaEq/1.05))*(BOTTOM-TOP); ctxOmega.moveTo(LEFT,yOeq); ctxOmega.lineTo(RIGHT,yOeq); ctxOmega.stroke(); ctxOmega.setLineDash([]);
+      ctxOmega.strokeStyle=AXIS_COLOR; ctxOmega.lineWidth=AXIS_W; { const yOne=TOP+(1-(1/1.05))*(BOTTOM-TOP); ctxOmega.beginPath(); ctxOmega.moveTo(LEFT,yOne); ctxOmega.lineTo(RIGHT,yOne); ctxOmega.stroke(); }
+      const mapY=v=> TOP + (1-(v/1.05))*(BOTTOM-TOP); drawLeftTicks(ctxOmega,LEFT,TOP,BOTTOM,[0,.25,.5,.75,1],mapY,AXIS_COLOR);
+      ctxOmega.strokeStyle="#8892a6"; ctxOmega.lineWidth=2; ctxOmega.beginPath(); for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=TOP+(1-clamp(state.omega[i]/1.05,0,1))*(BOTTOM-TOP); if(i===0) ctxOmega.moveTo(x,y); else ctxOmega.lineTo(x,y);} ctxOmega.stroke();
+      for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=TOP+(1-clamp(state.omega[i]/1.05,0,1))*(BOTTOM-TOP); ctxOmega.beginPath(); ctxOmega.arc(x,y,3.2,0,TWO_PI); ctxOmega.fillStyle=state.colors[i]; ctxOmega.fill(); }
+      drawMathText(ctxOmega,"Agent (i)",W/2,H-8,{size:FONT_PX,align:'center'}); ctxOmega.save(); ctxOmega.translate(14,H/2); ctxOmega.rotate(-Math.PI/2); drawMathText(ctxOmega,"ω_{i} / Ω_{max}",0,0,{size:FONT_PX,align:'center'}); ctxOmega.restore();
+    }
+
+    function drawDeltaChart(dth){ const {W,H}=prepCanvas(cnvDelta,ctxDelta); const LEFT=40, RIGHT=W-40, TOP=10, BOTTOM=H-30; ctxDelta.strokeStyle=AXIS_COLOR; ctxDelta.lineWidth=AXIS_W; ctxDelta.beginPath(); ctxDelta.moveTo(LEFT,BOTTOM); ctxDelta.lineTo(RIGHT,BOTTOM); ctxDelta.moveTo(LEFT,TOP); ctxDelta.lineTo(LEFT,BOTTOM); ctxDelta.stroke(); const d0ang=state.d0/state.R, delta=TWO_PI/state.N; state.yMaxDelta=Math.max(state.yMaxDelta, Math.ceil(Math.max(...dth)/0.1)*0.1); const yFrom=v=> TOP + (1-((v+0.1*state.yMaxDelta)/(1.1*state.yMaxDelta)))*(H-40);
+      ctxDelta.setLineDash([6,6]); ctxDelta.lineWidth=DASH_W; ctxDelta.strokeStyle="#cc6666"; ctxDelta.beginPath(); ctxDelta.moveTo(LEFT,yFrom(d0ang)); ctxDelta.lineTo(RIGHT,yFrom(d0ang)); ctxDelta.stroke();
+      ctxDelta.strokeStyle="#bbbbbb"; ctxDelta.beginPath(); ctxDelta.moveTo(LEFT,yFrom(delta)); ctxDelta.lineTo(RIGHT,yFrom(delta)); ctxDelta.stroke();
+      ctxDelta.strokeStyle=AXIS_COLOR; ctxDelta.beginPath(); ctxDelta.moveTo(LEFT,yFrom(0)); ctxDelta.lineTo(RIGHT,yFrom(0)); ctxDelta.stroke(); ctxDelta.setLineDash([]);
+      { const step=.2, maxTick=Math.max(step, Math.ceil(state.yMaxDelta/step)*step); const vals=[]; for(let v=0; v<=maxTick+1e-12; v+=step) vals.push(+v.toFixed(2)); drawLeftTicks(ctxDelta,LEFT,TOP,BOTTOM,vals,yFrom,AXIS_COLOR); }
+      const yD0=yFrom(d0ang), yDelta=yFrom(delta); drawMathText(ctxDelta,"d_{0}/R",LEFT+14,yD0-6,{size:FONT_PX,align:'left',color:'#cc6666'}); drawMathText(ctxDelta,"2π/N",RIGHT-4,yDelta-6,{size:FONT_PX,align:'right',color:'#bbbbbb'});
+      ctxDelta.strokeStyle="#7d8ecb"; ctxDelta.lineWidth=2; ctxDelta.beginPath(); for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=yFrom(dth[i]); if(i===0) ctxDelta.moveTo(x,y); else ctxDelta.lineTo(x,y);} ctxDelta.stroke();
+      for(let i=0;i<state.N;i++){ const x=LEFT+(W-50)*(i/(state.N-1)); const y=yFrom(dth[i]); ctxDelta.beginPath(); ctxDelta.arc(x,y,3,0,TWO_PI); ctxDelta.fillStyle=dth[i]>0?state.colors[i]:"#222"; ctxDelta.fill(); }
+      drawMathText(ctxDelta,"Agent (i)",W/2,H-8,{size:FONT_PX,align:'center'}); ctxDelta.save(); ctxDelta.translate(14,H/2); ctxDelta.rotate(-Math.PI/2); drawMathText(ctxDelta,"Δ_{i} (rad)",0,0,{size:FONT_PX,align:'center'}); ctxDelta.restore();
+    }
+
+    function drawTimeSeries(){ const show=chkShowCharts.checked; cnvTime.style.display=show?'block':'none'; if(!show) return; const tArr=state.timeSeries.t; if(tArr.length<2) { const _=prepCanvas(cnvTime,ctxTime); return; }
+      const {W,H}=prepCanvas(cnvTime,ctxTime); const LEFT=40, RIGHT=W-40, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
+      const tmin=tArr[0], tmax=tArr[tArr.length-1], mapX=v=> LEFT + ((v-tmin)/(tmax-tmin))*(RIGHT-LEFT);
+      const L=state.timeSeries.meanOmega, R=state.timeSeries.meanFlux, d=TWO_PI/state.N; const Jss=(state.R*d>state.d0)? (1-Math.exp(-(state.R*d-state.d0)))*(state.N/(TWO_PI)) : undefined;
+      let lmin=Math.min(...L), lmax=Math.max(...L); if(!isFinite(lmin)||!isFinite(lmax)){ lmin=0; lmax=1; } const lpad=(lmax-lmin||1)*.15; const mapY1=v=> TOP + (1-((v-(lmin-lpad))/((lmax+lpad)-(lmin-lpad))))*(H-40);
+      let rmin=Math.min(...R), rmax=Math.max(...R); if(Number.isFinite(Jss)){ rmin=Math.min(rmin,Jss); rmax=Math.max(rmax,Jss);} if(!isFinite(rmin)||!isFinite(rmax)){ rmin=0; rmax=1; } const rpad=(rmax-rmin||1)*.15; const mapY2=v=> TOP + (1-((v-(rmin-rpad))/((rmax+rpad)-(rmin-rpad))))*(H-40);
+      drawLeftTicks(ctxTime,LEFT,TOP,BOTTOM,niceTicks(lmin-lpad,lmax+lpad,5),mapY1,AXIS_COLOR);
+      drawRightTicks(ctxTime,RIGHT,TOP,BOTTOM,niceTicks(rmin-rpad,rmax+rpad,5),mapY2,"#f5a14b");
+      ctxTime.strokeStyle="#6bb7ff"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<L.length;i++){ const x=mapX(tArr[i]), y=mapY1(L[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
+      ctxTime.strokeStyle="#f5a14b"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<R.length;i++){ const x=mapX(tArr[i]), y=mapY2(R[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
+      if(Number.isFinite(Jss)){ ctxTime.setLineDash([6,6]); ctxTime.lineWidth=DASH_W; ctxTime.strokeStyle="#f5a14b"; const yRef=mapY2(Jss); ctxTime.beginPath(); ctxTime.moveTo(LEFT,yRef); ctxTime.lineTo(RIGHT,yRef); ctxTime.stroke(); ctxTime.setLineDash([]); }
+      drawMathText(ctxTime,"t (Ω_{max}^{-1})",W/2,H-8,{size:FONT_PX,align:'center'});
+      ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{eq})/Ω_{eq}":"RMS(ω−Ω_{eq})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
+      ctxTime.save(); ctxTime.translate(RIGHT+18,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime,"⟨J⟩",0,0,{size:FONT_PX,align:'center',color:'#f5a14b'}); ctxTime.restore();
+    }
+
+    // ==== Loop ====
+    function tick(){ if(!state.running) return; let dth; for(let s=0;s<state.stepsPerFrame;s++){ dth=stepOnce(); state.t+=state.dt; } const {meanJ,rmsOmega}=computeFluxAndStats(dth); state.timeSeries.t.push(state.t); state.timeSeries.meanOmega.push(state.OmegaEq>0? rmsOmega/state.OmegaEq : rmsOmega); state.timeSeries.meanFlux.push(meanJ); titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = '+state.t.toFixed(1); drawMain(dth); drawAgentCharts(); drawDeltaChart(dth); drawTimeSeries(); requestAnimationFrame(tick); }
+
+    // ==== Reset ====
+    function hardReset({apply=true}={}){ const was=state.running; state.running=false; if(apply) applyParams({restartIfNChanged:true}); else updateOmegaEq(); initArrays(); state.timeSeries={t:[],meanOmega:[],meanFlux:[]}; titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = 0.0'; const d=new Array(state.N).fill(TWO_PI/state.N); drawMain(d); drawAgentCharts(); drawDeltaChart(d); drawTimeSeries(); if(was){ state.running=true; requestAnimationFrame(tick);} }
+
+    // ==== Drag/Resize ====
+    function initDragResize(){ let dragEl=null; wrap.addEventListener('dragstart', e=>{ const card=e.target.closest('.card'); if(!card) return; dragEl=card; card.classList.add('dragging'); try{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',''); }catch(_){} });
+      wrap.addEventListener('dragend', ()=>{ if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; syncCanvasSizes(); resizeAll(); } });
+      wrap.addEventListener('dragover', e=>{ e.preventDefault(); try{ e.dataTransfer.dropEffect='move'; }catch(_){} const after=getDragAfterElement(wrap,e.clientX,e.clientY); const dragging=wrap.querySelector('.dragging'); if(!dragging) return; if(after==null) wrap.appendChild(dragging); else wrap.insertBefore(dragging,after); });
+      wrap.addEventListener('dragenter', e=>{ e.preventDefault(); try{ e.dataTransfer.dropEffect='move'; }catch(_){} });
+      wrap.addEventListener('drop', e=>{ e.preventDefault(); const dragging=wrap.querySelector('.dragging'); if(!dragging) return; const after=getDragAfterElement(wrap,e.clientX,e.clientY); if(after==null) wrap.appendChild(dragging); else wrap.insertBefore(dragging,after); });
+      function getDragAfterElement(container,x,y){ const els=[...container.querySelectorAll('.card:not(.dragging)')]; let closest={offset:-Infinity,element:null}; for(const el of els){ const r=el.getBoundingClientRect(); const off=y-r.top-r.height/2; if(off<0 && off>closest.offset) closest={offset:off,element:el}; } return closest.element; }
+      let resizing=null,startY=0,startH=0; wrap.addEventListener('mousedown', e=>{ const handle=e.target.closest('.resizer'); if(!handle) return; resizing=handle.closest('.card'); const rect=resizing.getBoundingClientRect(); startY=e.clientY; startH=rect.height; document.body.style.userSelect='none'; });
+      window.addEventListener('mousemove', e=>{ if(!resizing) return; const dy=e.clientY-startY; resizing.style.height=Math.max(160,startH+dy)+'px'; syncCanvasSizes(); resizeAll(); });
+      window.addEventListener('mouseup', ()=>{ if(resizing){ resizing=null; document.body.style.userSelect=''; } });
+    }
+
+    // ==== Events & init ====
+    inpSteps.addEventListener('input', ()=>{ let v=Math.round(+inpSteps.value); if(!Number.isFinite(v)||v<1) v=1; inpSteps.value=String(v); state.stepsPerFrame=v; });
+    btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; requestAnimationFrame(tick); } });
+    btnPause.addEventListener('click', ()=>{ state.running=false; });
+    btnReset.addEventListener('click', ()=> hardReset({apply:true}) );
+
+    document.getElementById('howHost').addEventListener('click', e=>{ e.preventDefault(); alert(`Quick hosting (free):
+
+1) Create a new public GitHub repo (e.g., traffic-model-web).
+2) Add this single file as index.html and commit.
+3) In repo Settings → Pages, pick “Deploy from a branch”, branch: main, folder: / (root).
+4) Your app will be live at: https://<your-user>.github.io/traffic-model-web/
+
+Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`); });
+
+    function currentDeltaTheta(){ const N=state.N,a=new Array(N); for(let i=0;i<N;i++){ let d=state.theta[(i+1)%N]-state.theta[i]; if(d<0) d+=TWO_PI; a[i]=d; } return a; }
+    function resizeAll(){ syncCanvasSizes(); const d=currentDeltaTheta(); drawMain(d); drawAgentCharts(); drawDeltaChart(d); drawTimeSeries(); }
+
+    applyParams({restartIfNChanged:false}); initArrays(); saveUIFromState(); resizeAll(); initDragResize(); window.addEventListener('resize', resizeAll);
+
+    // ==== Self-tests (console) ====
+    (function(){ const tests=[], push=(n,ok,info="")=>tests.push({name:n,ok,info}); try{ const ac=computeAlphaC(50,5,0.6); push("alpha_c positive",ac>0,`alpha_c=${ac.toFixed(4)}`);
+      const pN=state.N,pR=state.R,pd0=state.d0; state.N=50; state.R=0.05; state.d0=5; updateOmegaEq(); push("OmegaEq zero in jammed limit", state.OmegaEq===0, `OmegaEq=${state.OmegaEq}`); state.N=pN; state.R=pR; state.d0=pd0; updateOmegaEq();
+      const r1=parseMathRuns('Ω_{eq}'); push('parse subscript group', r1.length>=2 && r1[1].kind==='sub' && r1[1].text==='eq');
+      const r2=parseMathRuns('ω_i');    push('parse single-char subscript', r2.length===2 && r2[1].kind==='sub' && r2[1].text==='i');
+      const r3=parseMathRuns('Ω_{max}^{-1}'); push('parse sub & sup', r3.some(r=>r.kind==='sub') && r3.some(r=>r.kind==='sup'));
+      const old=state.stepsPerFrame; inpSteps.value=300; applyParams({restartIfNChanged:false}); push('stepsPerFrame updates', state.stepsPerFrame===300, `spf=${state.stepsPerFrame}`); inpSteps.value=old; applyParams({restartIfNChanged:false});
+      push('drawMain defined', typeof drawMain==='function'); push('drawDeltaChart defined', typeof drawDeltaChart==='function'); push('drawTimeSeries defined', typeof drawTimeSeries==='function'); push('initDragResize defined', typeof initDragResize==='function'); push('niceTicks defined', typeof niceTicks==='function');
+      try{ resizeAll(); push('resizeAll executes', true);}catch(err){ push('resizeAll executes', false, err&&err.message?err.message:String(err)); }
+    }catch(e){ push('self-test error',false,e&&e.message?e.message:String(e)); } console.table(tests); })();
+
+    window.addEventListener('error', ev=>{ console.error('Uncaught error:', ev.error||ev.message||ev); });
+
+    // Autostart
+    state.running=true; requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
