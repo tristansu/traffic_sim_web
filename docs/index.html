@@ -733,7 +733,7 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
       const tests=[], push=(n,ok,info="")=>tests.push({name:n,ok,info});
       try{
         const ac=computeAlphaC(50,5,0.6); push("alpha_c positive",ac>0,`alpha_c=${ac.toFixed(4)}`);
-        const pN=state.N,pR=state.R,pd0=state.d0; state.N=50; state.R=0.05; state.d0=5; updateOmegaEq();
+        const pN=state.N,pR=state.R,pd0=state.d0; state.N=50; state.R=5; state.d0=0.5; updateOmegaEq();
         push("OmegaEq zero in jammed limit", state.OmegaEq===0, `OmegaEq=${state.OmegaEq}`);
         state.N=pN; state.R=pR; state.d0=pd0; updateOmegaEq();
 
