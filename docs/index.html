@@ -564,17 +564,38 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
 
       const d0ang=state.d0/state.R, delta=TWO_PI/state.N;
       state.yMaxDelta=Math.max(state.yMaxDelta, Math.ceil(Math.max(...dth)/0.1)*0.1);
-      const yFrom=v=> TOP + (1-((v+0.1*state.yMaxDelta)/(1.1*state.yMaxDelta)))*(H-40);
+      const rangeH = BOTTOM - TOP;
+      const negPad = Math.max(0.05, 0.1 * state.yMaxDelta);  // ensures a little zone below 0 is visible
+      const yFrom = v => TOP + (1 - ((v + negPad) / (state.yMaxDelta + negPad))) * rangeH;
+      // Reference lines (all dashed)
+      ctxDelta.setLineDash([6,6]);
+      ctxDelta.lineWidth = DASH_W;
+      
+      // d0/R (red dashed)
+      ctxDelta.strokeStyle = "#cc6666";
+      ctxDelta.beginPath();
+      ctxDelta.moveTo(LEFT, yFrom(d0ang));
+      ctxDelta.lineTo(RIGHT, yFrom(d0ang));
+      ctxDelta.stroke();
+      
+      // 2π/N (light gray dashed)
+      ctxDelta.strokeStyle = "#bbbbbb";
+      ctxDelta.beginPath();
+      ctxDelta.moveTo(LEFT, yFrom(delta));
+      ctxDelta.lineTo(RIGHT, yFrom(delta));
+      ctxDelta.stroke();
+      
+      // 0 (white dashed) — will always be inside the plot because of negPad
+      ctxDelta.strokeStyle = "#ffffff";
+      ctxDelta.beginPath();
+      ctxDelta.moveTo(LEFT, yFrom(0));
+      ctxDelta.lineTo(RIGHT, yFrom(0));
+      ctxDelta.stroke();
+      
+      ctxDelta.setLineDash([]); // reset dash for the rest
 
-      // reference lines
-      ctxDelta.setLineDash([6,6]); ctxDelta.lineWidth=DASH_W; ctxDelta.strokeStyle="#cc6666";
-      ctxDelta.beginPath(); ctxDelta.moveTo(LEFT,yFrom(d0ang)); ctxDelta.lineTo(RIGHT,yFrom(d0ang)); ctxDelta.stroke();
-      ctxDelta.strokeStyle="#bbbbbb";
-      ctxDelta.beginPath(); ctxDelta.moveTo(LEFT,yFrom(delta)); ctxDelta.lineTo(RIGHT,yFrom(delta)); ctxDelta.stroke();
-      ctxDelta.strokeStyle=AXIS_COLOR; ctxDelta.beginPath(); ctxDelta.moveTo(LEFT,yFrom(0)); ctxDelta.lineTo(RIGHT,yFrom(0)); ctxDelta.stroke(); ctxDelta.setLineDash([]);
-
-      // y-ticks every 0.2
-      { const step=.2, maxTick=Math.max(step, Math.ceil(state.yMaxDelta/step)*step); const vals=[]; for(let v=0; v<=maxTick+1e-12; v+=step) vals.push(+v.toFixed(2)); drawLeftTicks(ctxDelta,LEFT,TOP,BOTTOM,vals,yFrom,AXIS_COLOR); }
+      // y-ticks every 0.1
+      { const step=.1, maxTick=Math.max(step, Math.ceil(state.yMaxDelta/step)*step); const vals=[]; for(let v=0; v<=maxTick+1e-12; v+=step) vals.push(+v.toFixed(2)); drawLeftTicks(ctxDelta,LEFT,TOP,BOTTOM,vals,yFrom,AXIS_COLOR); }
 
       // labels on the reference lines
       const yD0=yFrom(d0ang), yDelta=yFrom(delta);
