@@ -553,7 +553,10 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
 
       // labels on the reference lines
       const yD0=yFrom(d0ang), yDelta=yFrom(delta);
-      drawMathText(ctxDelta,"d_{0}/R",LEFT+14,yD0-6,{size:FONT_PX,align:'left',color:'#cc6666'});
+      const labelPad = 6;
+      let yD0Label = yD0 + (FONT_PX + labelPad);
+      if (yD0Label > BOTTOM - 8) yD0Label = yD0 - 8;  // avoid clipping at the bottom
+      drawMathText(ctxDelta,"d_{0}/R",LEFT+14, yD0Label, {size:FONT_PX,align:'left',color:'#cc6666'});
       drawMathText(ctxDelta,"2π/N",RIGHT-4,yDelta-6,{size:FONT_PX,align:'right',color:'#bbbbbb'});
 
       // Δᵢ curve + markers
