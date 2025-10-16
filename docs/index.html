@@ -24,6 +24,12 @@
     .group h3{margin:0 0 8px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
     label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
     input[type=number],select{width:100%;background:#0b0e13;color:var(--text);border:1px solid #232837;border-radius:8px;padding:8px 10px;outline:none}
+    /* Make only the Preset dropdown narrower */
+    #selPreset{
+      width: 220px;        /* pick your size */
+      max-width: 220px;    /* keep it from growing */
+      flex: 0 0 auto;      /* stop flexbox from stretching it */
+    }
     .top .group input[type=number]{width:100px}
     .btnRow{display:flex;gap:8px;flex-wrap:wrap}
     button{background:linear-gradient(180deg,#1c2633 0%,#141b24 100%);color:var(--text);border:1px solid #253042;border-radius:10px;padding:10px 12px;font-weight:600;font-size:13px;cursor:pointer;transition:transform .06s ease,filter .12s ease,background .12s ease}
