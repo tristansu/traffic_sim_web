@@ -333,7 +333,31 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
         drawMathText(ctx,String(+v.toFixed(2)).replace(/\.00$/,""),R+8,y+4,{size:12,align:'left',color});
       } ctx.restore();
     }
+    function drawBottomTicks(ctx, L, R, B, vals, mapX, color=AXIS_COLOR){
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle   = color;
+      ctx.lineWidth   = 1.5;
+    
+      for (const v of vals){
+        const x = mapX(v);
+        if (x < L-1 || x > R+1) continue;
+    
+        // short tick UP into the plot so it won’t collide with the axis title
+        ctx.beginPath();
+        ctx.moveTo(x, B);
+        ctx.lineTo(x, B - 6);
+        ctx.stroke();
+    
+        // time label just above the axis line
+        const s = (Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1))
+                   .replace(/\.00?$/,''); // trim trailing .0 / .00
+        drawMathText(ctx, s, x, B - 8, { size: 12, align: 'center', color });
+      }
+      ctx.restore();
+    }
 
+    
     // =================
     // Global sim state
     // =================
@@ -639,6 +663,8 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       cnvTime.style.display='block'; const tArr=state.timeSeries.t; if(tArr.length<2) { const _=prepCanvas(cnvTime,ctxTime); return; }
       const {W,H}=prepCanvas(cnvTime,ctxTime); const LEFT=72, RIGHT=W-72, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
       const tmin=tArr[0], tmax=tArr[tArr.length-1], mapX=v=> LEFT + ((v-tmin)/(tmax-tmin))*(RIGHT-LEFT);
+      const xTicks = niceTicks(tmin, tmax, 6);
+      drawBottomTicks(ctxTime, LEFT, RIGHT, BOTTOM, xTicks, mapX, AXIS_COLOR);
       const L=state.timeSeries.meanOmega, R=state.timeSeries.meanFlux, d=TWO_PI/state.N; const Jss=(state.R*d>state.d0)? (1-Math.exp(-(state.R*d-state.d0)))*(state.N/(TWO_PI)) : undefined;
       let lmin=Math.min(...L), lmax=Math.max(...L); if(!isFinite(lmin)||!isFinite(lmax)){ lmin=0; lmax=1; } const lpad=(lmax-lmin||1)*.15; const mapY1=v=> TOP + (1-((v-(lmin-lpad))/((lmax+lpad)-(lmin-lpad))))*(H-40);
       let rmin=Math.min(...R), rmax=Math.max(...R); if(Number.isFinite(Jss)){ rmin=Math.min(rmin,Jss); rmax=Math.max(rmax,Jss);} if(!isFinite(rmin)||!isFinite(rmax)){ rmin=0; rmax=1; } const rpad=(rmax-rmin||1)*.15; const mapY2=v=> TOP + (1-((v-(rmin-rpad))/((rmax+rpad)-(rmin-rpad))))*(H-40);
