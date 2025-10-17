@@ -562,7 +562,7 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const d0ang=state.d0/state.R, delta=TWO_PI/state.N;
       state.yMaxDelta=Math.max(state.yMaxDelta, Math.ceil(Math.max(...dth)/0.1)*0.1);
       const rangeH = BOTTOM - TOP;
-      const negPad = Math.max(0.05, 0.1 * state.yMaxDelta);  // ensures a little zone below 0 is visible
+      const negPad = 0.05; // fixed amount of axis below 0 (in radians)
       const yFrom = v => TOP + (1 - ((v + negPad) / (state.yMaxDelta + negPad))) * rangeH;
       // Reference lines (all dashed)
       ctxDelta.setLineDash([6,6]);
