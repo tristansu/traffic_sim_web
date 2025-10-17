@@ -73,12 +73,12 @@ window.MathJax = {
     <section class="eqpane">
     <div class="eq mathjax">
       \begin{equation}
-      \ddot{\theta}_i =
+      \ddot{\theta}_i(t) =
       \begin{cases}
-      -\alpha \dot{\theta}_i, & \Delta_i < \frac{d_0}{R} \\
-      \alpha \left( 1 - e^{-(R\Delta_i - d_0)} - \dot{\theta}_i \right), & \Delta_i \ge \frac{d_0}{R}
+      -\alpha \dot{\theta}_i(t), & \Delta_i(t) < \frac{d_0}{R} \\
+      \alpha \left( 1 - e^{-(R\Delta_i(t) - d_0)} - \dot{\theta}_i(t) \right), & \Delta_i(t) \ge \frac{d_0}{R}
       \end{cases}
-        \,\,\,\,\mbox{with}\,\,\,\,\Delta_i = \theta_{i+1} - \theta_i
+        \,\,\,\,\,\,\mbox{with}\,\,\,\,\,\,\Delta_i = \theta_{i+1} - \theta_i
       \end{equation}
   </div>
 </section>
@@ -105,6 +105,8 @@ window.MathJax = {
           <option value="low_lh_diff">12. Two-phase w/ similar densities</option>
           <option value="sticky_stable_low_perturb">13. High alpha & N, low perturbation</option>
           <option value="sticky_stable_high_perturb">14. High alpha & N, high perturb solitons</option>         
+          <option value="large_tight">15. Large N, stable jamiton</option> 
+          <option value="large_similar_density">16. Large N, similar densities</option> 
     </select>
   </div>
           <div class="grid2">
@@ -212,6 +214,8 @@ const PRESETS = {
   low_lh_diff: { N:50,  R:50,   d0:6,  epsilon:0.2, nfreq:2, dt:0.0001, stepsPerFrame:50, alphaRatio: 0.8 },
   sticky_stable_low_perturb: { N:200,  R:50,   d0:0.5,  epsilon:0.9, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio: 1.1 },
   sticky_stable_high_perturb: { N:200,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio: 1.1 },
+  large_tight: { N:500,  R:50,   d0:0.8,  epsilon:1, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio: 0.3 },
+  large_similar_density: { N:500,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, dt:0.0001, stepsPerFrame:500, alphaRatio: 1 }
 };
 
 function setInputsFromPreset(p) {
