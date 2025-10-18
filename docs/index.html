@@ -209,19 +209,10 @@ window.MathJax = {
                     <!-- Actions (moved inside parameter group) -->
           <div class="actions" style="margin-top:10px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
             <div class="btnRow" style="display:flex;gap:12px;">
-              <button id="btnStart" class="primary">Start</button>
-              <span class="infoIcon" aria-label="info"
-                data-tip="Run the simulation loop. Continues until Stop or Reset.">i</span>
-            
-              <button id="btnStop" class="muted">Stop</button>
-              <span class="infoIcon" aria-label="info"
-                data-tip="Pause the simulation without changing the current state.">i</span>
-            
-              <button id="btnStep" class="muted" title="Advance one frame">Step</button>   <!-- added -->
-            
+              <button id="btnStart" class="primary" title="Run the simulation loop. Continues until Stop or Reset.">Start</button>
+              <button id="btnStop" class="muted" title="Pause the simulation without changing the current state.">Stop</button>
+              <button id="btnStep" class="muted" title="Advance one frame.">Step</button>
               <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation to initial conditions.">Reset</button>
-              <span class="infoIcon" aria-label="info"
-                data-tip="Apply the inputs, re-initialize arrays, clear RMS/⟨J⟩ plots, and set T=0.">i</span>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
