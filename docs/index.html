@@ -166,20 +166,20 @@ window.MathJax = {
 
     <section class="left">
       <div class="canvasWrap" id="canvasWrap">
-        <div class="card draggable resizable" data-id="polar" draggable="true" data-blurb="Left ring shows θᵢ(t). Right ring shows θᵢ(t) − Ωₑq·t when enabled. Green dot = mean angle; gray dot = jamiton tracker.">
+        <div class="card draggable resizable" data-id="polar" draggable="true" data-blurb="Left ring shows θᵢ(t) for all agents, each represented by a colored dot. As the system phase separates into high and low density, the green dot tracks the high-density phase, and the red and green circular pieces, track each phase. Right ring shows θᵢ(t) − Ωₑq·t when enabled, this shows motion relative to the steady-state.">
           <div class="cardTitle"><span id="titlePolar">T (Ω<sub>max</sub><sup>-1</sup>) = 0.0</span></div>
           <canvas id="canvasMain"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="omega" draggable="true" data-blurb="Per-agent angular speed ωᵢ/Ωₘₐₓ vs agent index. Gray line=1, dashed=Ωₑq, blue dashed=steady-state ω from max Δᵢ.">
+        <div class="card draggable resizable" data-id="omega" draggable="true" data-blurb="Per-agent angular speed ωᵢ/Ωₘₐₓ vs agent index. Gray line=1, dashed = Ω_eq, blue dashed = steady-state ω from max Δᵢ.">
           <canvas id="canvasOmega"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="delta" draggable="true" data-blurb="Neighbor spacing Δᵢ (rad). Dashed refs: 0 (white), 2π/N (gray), d₀/R (red). Crash overlay triggers on overtake.">
+        <div class="card draggable resizable" data-id="delta" draggable="true" data-blurb="Neighbor spacing Δᵢ (rad). Dashed refs: 0 (white), 2π/N (gray), d₀/R (orange). Crash overlay triggers on overtake.">
           <canvas id="canvasDelta"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="time" draggable="true" data-blurb="RMS(ω−Ωₑq) (left axis) and ⟨J⟩ (right axis) over time. Right dashed line = steady-state ⟨J⟩.">
+        <div class="card draggable resizable" data-id="time" draggable="true" data-blurb="RMS(ω−Ω_eq) (left axis) and ⟨J⟩ (right axis) over time. Right dashed line = steady-state ⟨J⟩.">
           <canvas id="canvasTime"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
