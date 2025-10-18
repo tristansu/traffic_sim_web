@@ -42,6 +42,26 @@
     .math sub{ font-size:.75em; line-height:0; vertical-align:-0.25em; }
     .math sup{ font-size:.75em; line-height:0; vertical-align:0.45em; }
     header .eq{ margin-top:8px; }
+    /* --- Hover info blurb (3s delayed) --- */
+    .card .hoverBlurb{
+      position:absolute;
+      top:8px; left:8px;
+      max-width:72%;
+      background:rgba(20,24,33,0.95);
+      color:var(--text);
+      border:1px solid #2b3245;
+      border-radius:8px;
+      padding:8px 10px;
+      font-size:12px;
+      line-height:1.3;
+      box-shadow:0 6px 16px rgba(0,0,0,.35);
+      opacity:0;
+      transform:translateY(-4px);
+      pointer-events:none;
+      z-index:10;
+      transition:opacity .18s ease, transform .18s ease;
+    }
+    .card .hoverBlurb.show{ opacity:1; transform:translateY(0); }
   </style>
   <script>
 window.MathJax = {
@@ -146,20 +166,20 @@ window.MathJax = {
 
     <section class="left">
       <div class="canvasWrap" id="canvasWrap">
-        <div class="card draggable resizable" data-id="polar" draggable="true">
+        <div class="card draggable resizable" data-id="polar" draggable="true" data-blurb="Left ring shows θᵢ(t). Right ring shows θᵢ(t) − Ωₑq·t when enabled. Green dot = mean angle; gray dot = jamiton tracker.">
           <div class="cardTitle"><span id="titlePolar">T (Ω<sub>max</sub><sup>-1</sup>) = 0.0</span></div>
           <canvas id="canvasMain"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="omega" draggable="true">
+        <div class="card draggable resizable" data-id="omega" draggable="true" data-blurb="Per-agent angular speed ωᵢ/Ωₘₐₓ vs agent index. Gray line=1, dashed=Ωₑq, blue dashed=steady-state ω from max Δᵢ.">
           <canvas id="canvasOmega"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="delta" draggable="true">
+        <div class="card draggable resizable" data-id="delta" draggable="true" data-blurb="Neighbor spacing Δᵢ (rad). Dashed refs: 0 (white), 2π/N (gray), d₀/R (red). Crash overlay triggers on overtake.">
           <canvas id="canvasDelta"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="time" draggable="true">
+        <div class="card draggable resizable" data-id="time" draggable="true" data-blurb="RMS(ω−Ωₑq) (left axis) and ⟨J⟩ (right axis) over time. Right dashed line = steady-state ⟨J⟩.">
           <canvas id="canvasTime"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
@@ -812,6 +832,47 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       window.addEventListener('mouseup', ()=>{ if(resizing){ resizing=null; document.body.style.userSelect=''; } });
     }
 
+    // =============================
+    // Hover blurbs (3s delay)
+    // =============================
+    const HOVER_DELAY_MS = 3000;
+    const hoverTimers = new WeakMap();
+    
+    function setupInfoBlurbs(){
+      // attach to all current cards
+      wrap.querySelectorAll('.card').forEach(card=>{
+        const clear = ()=>{
+          const t = hoverTimers.get(card);
+          if (t){ clearTimeout(t); hoverTimers.delete(card); }
+          hideBlurb(card);
+        };
+        card.addEventListener('mouseenter', ()=>{
+          const t = setTimeout(()=> showBlurb(card), HOVER_DELAY_MS);
+          hoverTimers.set(card, t);
+        });
+        card.addEventListener('mouseleave', clear);
+        card.addEventListener('dragstart', clear);
+      });
+    }
+    
+    function showBlurb(card){
+      let el = card.querySelector('.hoverBlurb');
+      if (!el){
+        el = document.createElement('div');
+        el.className = 'hoverBlurb';
+        el.textContent = card.dataset.blurb || 'Plot info';
+        card.appendChild(el);
+        requestAnimationFrame(()=> el.classList.add('show'));
+      } else {
+        el.classList.add('show');
+      }
+    }
+    
+    function hideBlurb(card){
+      const el = card.querySelector('.hoverBlurb');
+      if (el) el.classList.remove('show');
+    }
+    
     // ======================
     // Events & first render
     // ======================
@@ -852,6 +913,7 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
     saveUIFromState(); 
     resizeAll(); 
     initDragResize();
+    setupInfoBlurbs();
     updateButtons();
     if (selPreset) selPreset.value = '';
     window.addEventListener('resize', resizeAll);
