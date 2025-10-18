@@ -62,6 +62,70 @@
       transition:opacity .18s ease, transform .18s ease;
     }
     .card .hoverBlurb.show{ opacity:1; transform:translateY(0); }
+    /* --- Inline "(i)" info icon + tooltip --- */
+    .infoIcon{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:16px; height:16px;
+      margin-left:6px;
+      border-radius:50%;
+      background:#1f2633;
+      border:1px solid #2b3245;
+      color:var(--accent);
+      font-weight:700;
+      font-size:11px;
+      line-height:1;
+      cursor:help;
+      position:relative;
+      vertical-align:middle;
+      user-select:none;
+    }
+    
+    .infoIcon::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:50%;
+      bottom:125%;
+      transform: translate(-50%,-6px);
+      background: rgba(20,24,33,0.98);
+      color: var(--text);
+      border:1px solid #2b3245;
+      border-radius:8px;
+      padding:8px 10px;
+      font-size:12px;
+      line-height:1.35;
+      min-width:180px;
+      max-width:280px;
+      white-space:normal;
+      box-shadow:0 6px 16px rgba(0,0,0,.35);
+      opacity:0;
+      pointer-events:none;
+      z-index:50;
+      transition: opacity .15s ease, transform .15s ease;
+    }
+    
+    .infoIcon::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      bottom:118%;
+      transform: translateX(-50%);
+      border:6px solid transparent;
+      border-top-color: rgba(20,24,33,0.98);
+      opacity:0;
+      transition: opacity .15s ease;
+    }
+    
+    .infoIcon:hover::after,
+    .infoIcon[data-open="1"]::after{
+      opacity:1;
+      transform: translate(-50%,-10px);
+    }
+    .infoIcon:hover::before,
+    .infoIcon[data-open="1"]::before{
+      opacity:1;
+    }
   </style>
   <script>
 window.MathJax = {
@@ -131,26 +195,35 @@ window.MathJax = {
   </div>
           <div class="grid2">
             <div style="display:grid;gap:8px;">
-              <div><label>α/α<sub>c</sub></label><input id="inpAlphaRatio" type="number" value="0.5" step="0.01" min="0" /></div>
-              <div><label for="inpN">N (cars)</label><input id="inpN" type="number" value="50" min="3" max="500" step="1" /></div>
-              <div><label for="inpR">R (ring radius)</label><input id="inpR" type="number" value="5" step="0.1" /></div>
-              <div><label for="inpd0">d₀ (stop distance)</label><input id="inpd0" type="number" value="0.5" step="0.01" /></div>
+              <div><label>α/α<sub>c</sub><span class="infoIcon" aria-label="info" data-tip="Sets α as a fraction of the critical α_c for linear stability. Values > 1 tend toward the steady-state, values < 1 propagate disturbances in density, and frequently phase separate.">i</span></label><input id="inpAlphaRatio" type="number" value="0.5" step="0.01" min="0" /></div>
+              <div><label for="inpN">N (cars)<span class="infoIcon" aria-label="info" data-tip="Number of agents on the ring. Higher N reduces uniform spacing Δ* = 2π/N.">i</span></label><input id="inpN" type="number" value="50" min="3" max="500" step="1" /></div>
+              <div><label for="inpR">R (ring radius)<span class="infoIcon" aria-label="info" data-tip="Ring radius. For the same angular gap Δᵢ, the physical gap is R·Δᵢ. Larger R increases spacing RΔᵢ for fixed N.">i</span></label><input id="inpR" type="number" value="5" step="0.1" /></div>
+              <div><label for="inpd0">d₀ (stop distance)<span class="infoIcon" aria-label="info" data-tip="Minimum gap where agents brake: if R·Δᵢ ≤ d₀, speed exponentially decreases with rate α toward zero (stop regime).">i</span></label><input id="inpd0" type="number" value="0.5" step="0.01" /></div>
             </div>
             <div style="display:grid;gap:8px;">
-              <div><label for="inpEps">ε (angle perturbation)</label><input id="inpEps" type="number" value="0.5" step="0.01" /></div>
-              <div><label for="inpNfreq">n (perturb freq)</label><input id="inpNfreq" type="number" value="0.5" step="0.01" /></div>
-              <div><label for="inpDt">Δt (sim step)</label><input id="inpDt" type="number" value="0.0001" step="0.0001" /></div>
-              <div><label for="inpSteps">Steps / frame</label><input id="inpSteps" type="number" value="500" step="1" /></div>
-            </div>
+              <div><label for="inpEps">ε (angle perturbation)<span class="infoIcon" aria-label="info" data-tip="Initial sinusoidal amplitude (radians) of θᵢ; seeds pattern formation. Larger ε = stronger initial disturbance. The maximum ε is set by mean separation and perturbation frequency.">i</span></label><input id="inpEps" type="number" value="0.5" step="0.01" /></div>
+              <div><label for="inpNfreq">n (perturb freq)<span class="infoIcon" aria-label="info" data-tip="Spatial frequency of the initial perturbation (cycles per 2π); can be fractional.">i</span></label><input id="inpNfreq" type="number" value="0.5" step="0.01" /></div>
+              <div><label for="inpDt">Δt (sim step)<span class="infoIcon" aria-label="info" data-tip="Integrator time step. Too large can cause numerical instability; smaller is safer but slower. 0.0001 is a good choice, usually.">i</span></label><input id="inpDt" type="number" value="0.0001" step="0.0001" /></div>
+              <div><label for="inpSteps">Steps / frame<span class="infoIcon" aria-label="info" data-tip="How many Δt updates to run per animation frame. Higher = faster simulation time, heavier on CPU.">i</span></label><input id="inpSteps" type="number" value="500" step="1" /></div>            </div>
           </div>
                     <!-- Actions (moved inside parameter group) -->
           <div class="actions" style="margin-top:10px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
             <div class="btnRow" style="display:flex;gap:12px;">
               <button id="btnStart" class="primary">Start</button>
+              <span class="infoIcon" aria-label="info"
+                data-tip="Run the simulation loop. Continues until Stop or Reset.">i</span>
+            
               <button id="btnStop" class="muted">Stop</button>
+              <span class="infoIcon" aria-label="info"
+                data-tip="Pause the simulation without changing the current state.">i</span>
+            
               <button id="btnStep" class="muted" title="Advance one frame">Step</button>   <!-- added -->
-              <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation">Reset</button>
+            
+              <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation to initial conditions.">Reset</button>
+              <span class="infoIcon" aria-label="info"
+                data-tip="Apply the inputs, re-initialize arrays, clear RMS/⟨J⟩ plots, and set T=0.">i</span>
             </div>
+
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
               <label style="display:inline-flex;align-items:center;gap:8px;">
                 <input type="checkbox" id="chkShowRef" checked /> show θᵢ(t) − Ωₑᵩt ring
@@ -835,7 +908,7 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     // =============================
     // Hover blurbs (3s delay)
     // =============================
-    const HOVER_DELAY_MS = 3000;
+    const HOVER_DELAY_MS = 2000;
     const hoverTimers = new WeakMap();
     
     function setupInfoBlurbs(){
@@ -872,7 +945,34 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const el = card.querySelector('.hoverBlurb');
       if (el) el.classList.remove('show');
     }
+
+    // =============================
+    // Info icon (i) tooltip support
+    // =============================
+    function initInfoIcons(){
+      // Click to toggle open (helps on touch), click elsewhere closes
+      document.addEventListener('click', (e)=>{
+        const icon = e.target.closest('.infoIcon');
+        // Close all if clicking outside any icon
+        if (!icon){
+          document.querySelectorAll('.infoIcon[data-open="1"]').forEach(el=>el.removeAttribute('data-open'));
+          return;
+        }
+        // Toggle this one; close others
+        const isOpen = icon.getAttribute('data-open') === '1';
+        document.querySelectorAll('.infoIcon[data-open="1"]').forEach(el=>{ if(el!==icon) el.removeAttribute('data-open'); });
+        if (isOpen) icon.removeAttribute('data-open'); else icon.setAttribute('data-open','1');
+        e.stopPropagation();
+      });
     
+      // ESC to close
+      document.addEventListener('keydown', (e)=>{
+        if (e.key === 'Escape'){
+          document.querySelectorAll('.infoIcon[data-open="1"]').forEach(el=>el.removeAttribute('data-open'));
+        }
+      });
+    }
+
     // ======================
     // Events & first render
     // ======================
@@ -914,6 +1014,7 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
     resizeAll(); 
     initDragResize();
     setupInfoBlurbs();
+    initInfoIcons();
     updateButtons();
     if (selPreset) selPreset.value = '';
     window.addEventListener('resize', resizeAll);
