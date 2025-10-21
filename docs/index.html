@@ -212,6 +212,7 @@ window.MathJax = {
               <button id="btnStop" class="muted" title="Pause the simulation without changing the current state.">Stop</button>
               <button id="btnStep" class="muted" title="Advance one frame.">Step</button>
               <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation to initial conditions.">Reset</button>
+              <button id="btnShare" class="muted" title="Copy a link that restores the current parameters.">Copy Share Link</button>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
@@ -273,17 +274,46 @@ window.MathJax = {
     const inpEps = document.getElementById('inpEps'), inpNfreq = document.getElementById('inpNfreq');
     const inpSteps = document.getElementById('inpSteps'), inpAlphaRatio = document.getElementById('inpAlphaRatio');
     const btnStart = document.getElementById('btnStart'),
-      btnStop  = document.getElementById('btnStop'),
-      btnStep  = document.getElementById('btnStep'),
-      btnReset = document.getElementById('btnReset');
+          btnStop  = document.getElementById('btnStop'),
+          btnStep  = document.getElementById('btnStep'),
+          btnReset = document.getElementById('btnReset');
+
+    const btnShare = document.getElementById('btnShare');
+    if (btnShare) btnShare.addEventListener('click', async () => {
+      // Keep state in sync with current inputs before sharing
+      applyParams({ restartIfNChanged: false });
+      // Ensure URL reflects the exact current params
+      if (typeof writeParamsToUrl === "function") writeParamsToUrl();
+      try {
+        await navigator.clipboard.writeText(location.href);
+        const old = btnShare.textContent;
+        btnShare.textContent = "Copied!";
+        setTimeout(() => (btnShare.textContent = old), 1200);
+      } catch {
+        // Fallback when Clipboard API is unavailable
+        prompt("Copy this URL:", location.href);
+      }
+    });
+    
     const chkShowRef = document.getElementById('chkShowRef');
     const chkPhase = document.getElementById('chkPhase');
     const showRefRing = () => state.OmegaEq > 0 && (!chkShowRef || chkShowRef.checked);
     const showPhase  = () => (!chkPhase   || chkPhase.checked);
+    if (chkShowRef) chkShowRef.addEventListener('change', () => {
+      // note: showRefRing() already accounts for Ω_eq gating
+      applyParams({ restartIfNChanged: false });
+      writeParamsToUrl();
+    });
+    if (chkPhase) chkPhase.addEventListener('change', () => {
+      applyParams({ restartIfNChanged: false });
+      writeParamsToUrl();
+    });
+    
     let rafId = null; // track current requestAnimationFrame so resets don't create multiple loops
 
     // ===== Preset parameter selector =====
 const selPreset = document.getElementById('selPreset');
+if (selPreset) selPreset.addEventListener('change', () => applySelectedPreset(selPreset.value));
 
 const PRESETS = {
   small_gaussian:     { N:52,  R:5,   d0:0.6,  epsilon:0.5, nfreq:0.5, stepsPerFrame:500, alphaRatio:0.8 },
@@ -319,7 +349,8 @@ function applySelectedPreset(key) {
   const p = PRESETS[key];
   if (!p) return;
   setInputsFromPreset(p);
-  hardReset({ apply: true }); // re-read inputs, recompute, re-init arrays, and restart if it was running
+  hardReset({ apply: true });
+  writeParamsToUrl();
 }
 
 selPreset && selPreset.addEventListener('change', () => {
@@ -329,7 +360,69 @@ selPreset && selPreset.addEventListener('change', () => {
 
 // Make the dropdown reflect "Custom" if the user edits any numeric field after choosing a preset
 const numericInputs = [inpN, inpR, inpd0, inpEps, inpNfreq, inpSteps, inpAlphaRatio];
-numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPreset) selPreset.value = ''; }));
+numericInputs.forEach(el => el && el.addEventListener('input', () => {
+  if (selPreset) selPreset.value = '';     // switch to Custom
+  applyParams({ restartIfNChanged: false }); // sync -> state
+  writeParamsToUrl();                        // reflect in URL
+}));
+
+  // --- URL SHARE HELPERS (read/write current parameters) ---
+const toBool = v => (v === "1" || v === "true");
+const toStrBool = b => (b ? "1" : "0");
+
+// Build URL from current state (single source of truth is `state`)
+function writeParamsToUrl() {
+  const params = new URLSearchParams();
+
+  // Numeric state
+  params.set("N", String(state.N));
+  params.set("R", String(state.R));
+  params.set("d0", String(state.d0));
+  params.set("epsilon", String(state.epsilon));
+  params.set("nfreq", String(state.nfreq));
+  params.set("stepsPerFrame", String(state.stepsPerFrame));
+  params.set("alphaRatio", String(state.alphaRatio));
+
+  // Booleans (checkboxes)
+  if (typeof showRefRing === "function") params.set("showRef", toStrBool(showRefRing()));
+  if (typeof showPhase  === "function") params.set("showPhase", toStrBool(showPhase()));
+
+  // Preset (blank means “Custom”)
+  if (selPreset && selPreset.value) params.set("preset", selPreset.value);
+
+  const q = params.toString();
+  const url = q ? `?${q}` : location.pathname;
+  history.replaceState(null, "", url);
+}
+
+// Read URL and hydrate inputs BEFORE applyParams()
+function readParamsFromUrl() {
+  const params = new URLSearchParams(location.search);
+  if (!params || params.size === 0) return;
+
+  // If preset is provided and exists, apply it first (it sets a baseline)
+  const presetKey = params.get("preset") || "";
+  if (presetKey && PRESETS[presetKey]) {
+    selPreset.value = presetKey;
+    setInputsFromPreset(PRESETS[presetKey]);
+  } else if (selPreset) {
+    selPreset.value = ""; // Custom
+  }
+
+  // Apply individual numeric fields if present (they override preset)
+  const setNum = (el, key) => { if (params.has(key) && el) el.value = params.get(key); };
+  setNum(inpN, "N");
+  setNum(inpR, "R");
+  setNum(inpd0, "d0");
+  setNum(inpEps, "epsilon");
+  setNum(inpNfreq, "nfreq");
+  setNum(inpSteps, "stepsPerFrame");
+  setNum(inpAlphaRatio, "alphaRatio");
+
+  // Checkboxes (if present in DOM)
+  if (chkShowRef && params.has("showRef")) chkShowRef.checked = toBool(params.get("showRef"));
+  if (chkPhase   && params.has("showPhase")) chkPhase.checked = toBool(params.get("showPhase"));
+}
 
     
   function syncRefCheckbox(){
@@ -979,10 +1072,10 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     }
     
     inpSteps.addEventListener('input', ()=>{ let v=Math.round(+inpSteps.value); if(!Number.isFinite(v)||v<1) v=1; inpSteps.value=String(v); state.stepsPerFrame=v; });
-    btnStart && btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; updateButtons(); rafId = requestAnimationFrame(tick); } });
-    btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }; updateButtons(); });
-    btnStep && btnStep.addEventListener('click', stepFrame);
-    btnReset && btnReset.addEventListener('click', ()=> hardReset({apply:true}) );
+    btnStart && btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; updateButtons(); rafId = requestAnimationFrame(tick); writeParamsToUrl();});
+    btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }; updateButtons(); writeParamsToUrl();}); // possible remove writeParamsToUrl
+    btnStep && btnStep.addEventListener('click', stepFrame, writeParamsToUrl(););
+    btnReset && btnReset.addEventListener('click', ()=> hardReset({apply:true}); writeParamsToUrl(););
     // Update visuals immediately when toggling overlays
     chkShowRef && chkShowRef.addEventListener('change', resizeAll);
     chkPhase  && chkPhase.addEventListener('change', resizeAll);
@@ -1056,6 +1149,35 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
     // Autostart
     // =========
     state.running=false; rafId = requestAnimationFrame(tick);
+  
+    // --- Boot: read URL -> apply -> normalize URL
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1) If URL has ?params, push them into inputs/preset
+      if (typeof readParamsFromUrl === "function") {
+        readParamsFromUrl();
+      }
+    
+      // 2) Recompute derived state from inputs (alpha, OmegaEq, etc.)
+      applyParams({ restartIfNChanged: true });
+    
+      // 3) Mirror normalized values back to the UI
+      saveUIFromState();
+    
+      // 4) Reset/draw with URL-driven params
+      if (typeof hardReset === "function") {
+        hardReset({ apply: true });
+      }
+    
+      // 5) Normalize the URL (enforces types/precision/order)
+      if (typeof writeParamsToUrl === "function") {
+        writeParamsToUrl();
+      }
+    
+      // 6) Ensure the Preset selector reflects current (or Custom)
+      if (selPreset && !selPreset.value) {
+        // leave as Custom if the URL didn't specify a preset
+      }
+    });
 
   </script>
 </body>
