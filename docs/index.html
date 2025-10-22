@@ -213,8 +213,10 @@ window.MathJax = {
               <button id="btnStop" class="muted" title="Pause the simulation without changing the current state.">Stop</button>
               <button id="btnStep" class="muted" title="Advance one frame.">Step</button>
               <button id="btnReset" class="danger" title="Apply current parameters and reset the simulation to initial conditions.">Reset</button>
+              <!-- Share current settings as a URL -->
+              <button id="btnShare" class="muted" title="Copy a URL that restores these settings">Get shareable link</button>
             </div>
-
+            
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
               <label style="display:inline-flex;align-items:center;gap:8px;">
                 <input type="checkbox" id="chkShowRef" checked /> show θᵢ(t) − Ωₑᵩt ring
@@ -276,13 +278,66 @@ window.MathJax = {
     const btnStart = document.getElementById('btnStart'),
       btnStop  = document.getElementById('btnStop'),
       btnStep  = document.getElementById('btnStep'),
-      btnReset = document.getElementById('btnReset');
+      btnReset = document.getElementById('btnReset'),
+      btnShare = document.getElementById('btnShare');
     const chkShowRef = document.getElementById('chkShowRef');
     const chkPhase = document.getElementById('chkPhase');
     const showRefRing = () => state.OmegaEq > 0 && (!chkShowRef || chkShowRef.checked);
     const showPhase  = () => (!chkPhase   || chkPhase.checked);
     let rafId = null; // track current requestAnimationFrame so resets don't create multiple loops
 
+    // ===== URL share helpers (serialize/parse) =====
+    // Build a compact query string for the current UI values
+    function buildShareQuery() {
+      const q = new URLSearchParams();
+      q.set('N', inpN.value);
+      q.set('R', inpR.value);
+      q.set('d0', inpd0.value);
+      q.set('eps', inpEps.value);
+      q.set('nf', inpNfreq.value);
+      q.set('spf', inpSteps.value);
+      q.set('ar', inpAlphaRatio.value);
+      if (chkShowRef) q.set('ref', chkShowRef.checked ? '1' : '0');
+      if (chkPhase)   q.set('phase', chkPhase.checked ? '1' : '0');
+      if (selPreset && selPreset.value) q.set('preset', selPreset.value); // optional
+      return q.toString();
+    }
+    
+    // Apply values from a query string (?N=...&R=...)
+    // - If only "preset" is present, it uses that preset
+    // - If numeric params are present, they win over preset
+    function applyFromQuery(qs) {
+      const p = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
+    
+      // 1) If *only* preset is given, apply it first (and bail)
+      if (p.has('preset') && !p.has('N') && !p.has('R') && !p.has('d0')) {
+        const key = p.get('preset');
+        if (PRESETS[key]) {
+          applySelectedPreset(key);
+          return true;
+        }
+      }
+    
+      // 2) Otherwise map each provided field into inputs
+      if (p.has('N'))   inpN.value        = p.get('N');
+      if (p.has('R'))   inpR.value        = p.get('R');
+      if (p.has('d0'))  inpd0.value       = p.get('d0');
+      if (p.has('eps')) inpEps.value      = p.get('eps');
+      if (p.has('nf'))  inpNfreq.value    = p.get('nf');
+      if (p.has('spf')) inpSteps.value    = p.get('spf');
+      if (p.has('ar'))  inpAlphaRatio.value = p.get('ar');
+      if (p.has('ref') && chkShowRef) chkShowRef.checked = p.get('ref') === '1';
+      if (p.has('phase') && chkPhase) chkPhase.checked   = p.get('phase') === '1';
+    
+      // Keep the dropdown visually consistent
+      if (selPreset) selPreset.value = p.get('preset') || '';
+    
+      // Push values into state and redraw
+      hardReset({ apply: true });
+      return true;
+    }
+
+    
     // ===== Preset parameter selector =====
 const selPreset = document.getElementById('selPreset');
 
@@ -989,6 +1044,19 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }; updateButtons(); });
     btnStep && btnStep.addEventListener('click', stepFrame);
     btnReset && btnReset.addEventListener('click', ()=> hardReset({apply:true}) );
+    // Share button: copy a URL that restores current settings
+    btnShare && btnShare.addEventListener('click', async () => {
+      const url = new URL(location.href);
+      url.search = buildShareQuery();
+    
+      try {
+        await (navigator.clipboard && navigator.clipboard.writeText(url.toString()));
+        alert('Shareable link copied to clipboard!');
+      } catch (_) {
+        // Fallback prompt if Clipboard API not available (old browsers / cross-origin)
+        prompt('Copy this link:', url.toString());
+      }
+    });
     // Update visuals immediately when toggling overlays
     chkShowRef && chkShowRef.addEventListener('change', resizeAll);
     chkPhase  && chkPhase.addEventListener('change', resizeAll);
@@ -1005,17 +1073,36 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
 Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`);
     });
 
-    applyParams({restartIfNChanged:false}); 
-    forceInitialCheckboxes(); 
-    initArrays(); 
-    saveUIFromState(); 
-    resizeAll(); 
-    initDragResize();
-    setupInfoBlurbs();
-    initInfoIcons();
-    updateButtons();
-    if (selPreset) selPreset.value = '';
-    window.addEventListener('resize', resizeAll);
+    // Try to restore from URL first, else fall back to default init
+if (location.search && location.search.length > 1) {
+  const ok = applyFromQuery(location.search);
+  if (!ok) {
+    // Fallback if parsing failed
+    applyParams({restartIfNChanged:false});
+    forceInitialCheckboxes();
+    initArrays();
+    saveUIFromState();
+    resizeAll();
+  }
+  } else {
+    applyParams({restartIfNChanged:false});
+    forceInitialCheckboxes();
+    initArrays();
+    saveUIFromState();
+    resizeAll();
+  }
+  
+  // Usual one-time wiring
+  initDragResize();
+  setupInfoBlurbs();
+  initInfoIcons();
+  updateButtons();
+
+// Keep the preset dropdown visually on "Custom" if user tweaks numbers post-load
+if (selPreset) selPreset.value = '';
+
+window.addEventListener('resize', resizeAll);
+
 
     // =================
     // Tiny self-checks
