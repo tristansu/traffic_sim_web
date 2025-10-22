@@ -176,7 +176,7 @@ window.MathJax = {
         <label for="selPreset" style="margin:0;">Preset:</label>
         <select id="selPreset">
           <option value="">Custom (no preset)</option>
-          <option value="small_gaussian">1. Small, fast, low-density soliton</option> <!-- good -->
+          <option value="small_gaussian">1. Small, fast, low-density soliton (after coarsening)</option> <!-- good -->
           <option value="quasistable">2. Quasi-stable, high-density soliton</option><!-- good -->
           <option value="two_stable_soliton">3. Two high-density solitons</option><!-- good -->
           <option value="stable_high_freq">4. Stable high freq. perturbation</option>
@@ -342,7 +342,7 @@ window.MathJax = {
 const selPreset = document.getElementById('selPreset');
 
 const PRESETS = {
-  small_gaussian:     { N:52,  R:5,   d0:0.6,  epsilon:0.5, nfreq:0.5, stepsPerFrame:500, alphaRatio:0.8 },
+  small_gaussian:     { N:52,  R:5,   d0:0.6,  epsilon:0.2, nfreq:4, stepsPerFrame:500, alphaRatio:0.8 },
   quasistable:     { N:50, R:5,   d0:0.5, epsilon:0.5,nfreq:0.5, stepsPerFrame:500, alphaRatio:1 }, // R*2π/N ≲ d0
   two_stable_soliton:  { N:30,  R:6,   d0:0.5,  epsilon:0.05, nfreq:2, stepsPerFrame:500, alphaRatio:0.75 },
   stable_high_freq:   { N:50, R:5,   d0:0.6,  epsilon:0.1 ,nfreq:10, stepsPerFrame:500, alphaRatio:0.4 },
