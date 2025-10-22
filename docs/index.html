@@ -676,8 +676,13 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const d0ang=state.d0/state.R, delta=TWO_PI/state.N;
       state.yMaxDelta=Math.max(state.yMaxDelta, Math.ceil(Math.max(...dth)/0.1)*0.1);
       const rangeH = BOTTOM - TOP;
-      const negPad = 0.05; // fixed amount of axis below 0 (in radians)
-      const yFrom = v => TOP + (1 - ((v + negPad) / (state.yMaxDelta + negPad))) * rangeH;
+      // Make the lower bound 5% of the positive display height:
+      //   y-min = -0.05 * yMaxDelta
+      // Guard against zero to avoid divide-by-zero when everything is flat.
+      const posMax = Math.max(1e-9, state.yMaxDelta);
+      const negPad = 0.05 * posMax;   // 5% of the current positive range
+      const yFrom  = v => TOP + (1 - ((v + negPad) / (posMax + negPad))) * rangeH;
+
       // Reference lines (all dashed)
       ctxDelta.setLineDash([6,6]);
       ctxDelta.lineWidth = DASH_W;
