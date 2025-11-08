@@ -192,7 +192,8 @@ window.MathJax = {
           <option value="sticky_stable_high_perturb">14. High alpha & N, high perturb solitons</option>         
           <option value="large_tight">15. Large N, stable jamiton</option> 
           <option value="large_similar_density">16. Large N, similar densities</option> 
-          <option value="peters_out">17. Peters out</option> 
+          <option value="peters_out">17. Peters out</option>
+          <option value="small_num">18. Small N waves</option>
     </select>
   </div>
           <div class="grid2">
@@ -359,7 +360,8 @@ const PRESETS = {
   sticky_stable_high_perturb: { N:200,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 1.1 },
   large_tight: { N:500,  R:50,   d0:0.8,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 0.3 },
   large_similar_density: { N:500,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 1 },
-  peters_out: { N:50,  R:5,   d0:0.65,  epsilon:1, nfreq:1, stepsPerFrame:500, alphaRatio: 0.63 }
+  peters_out: { N:50,  R:5,   d0:0.65,  epsilon:1, nfreq:1, stepsPerFrame:500, alphaRatio: 0.63 },
+  small_num: { N:5,  R:5,   d0:5,  epsilon:0.5, nfreq:0.5, stepsPerFrame:500, alphaRatio: 0.65 }
 };
 
 function setInputsFromPreset(p) {
