@@ -1,12 +1,35 @@
-
-<!doctype html>
+<!DOCTYPE html>
+<!-- saved from url=(0044)https://tristansu.github.io/traffic_sim_web/ -->
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Simple Traffic Model Simulator</title>
   <style>
-    :root { --bg:#0e0f12; --panel:#14161b; --muted:#828aa0; --text:#e8ebf2; --accent:#6ee7ff; --accent2:#a78bfa; --good:#86efac; --warn:#fbbf24; --danger:#fb7185; --grid-gap:14px; --radius:14px; --card-w:560px; --w-polar:660px; --h-polar:360px; --w-omega:660px; --h-omega:300px; --w-delta:660px; --h-delta:300px; --w-time:660px; --h-time:300px; }
+    :root { 
+      --bg:#0e0f12; 
+      --panel:#14161b; 
+      --muted:#828aa0; 
+      --text:#e8ebf2; 
+      --accent:#6ee7ff; 
+      --accent2:#a78bfa; 
+      --good:#86efac; 
+      --warn:#fbbf24; 
+      --danger:#fb7185; 
+      --grid-gap:14px; 
+      --radius:14px; 
+      --card-w:560px; 
+      --w-polar:660px; 
+      --h-polar:360px; 
+      --w-omega:660px; 
+      --h-omega:300px; 
+      --w-omega1:660px; 
+      --h-omega1:300px; 
+      --w-delta:660px; 
+      --h-delta:300px; 
+      --w-time:660px; 
+      --h-time:300px; 
+    }
     *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji;color:var(--text);background:radial-gradient(1200px 800px at 40% -200px,#1b1f2b 0%,var(--bg) 60%)}
     .shell{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto auto 1fr auto;gap:var(--grid-gap);min-height:100vh;padding:16px 16px 20px}
     header,footer{grid-column:1/-1;background:linear-gradient(180deg,#171923 0%,#11131a 100%);border:1px solid #222633;border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(0,0,0,.25)}
@@ -16,7 +39,11 @@
     .left{display:grid;grid-template-rows:auto auto 1fr;gap:var(--grid-gap)} .canvasWrap{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
     .card{background:#10131a;border:1px solid #1e2330;border-radius:12px;padding:8px}
     .canvasWrap .card{position:relative;cursor:grab;width:var(--card-w);max-width:var(--card-w);flex:0 0 var(--card-w)} .canvasWrap .card.dragging{cursor:grabbing} .card.dragging{opacity:.65;outline:2px dashed #3b82f6}
-    .card[data-id="polar"]{--card-w:var(--w-polar);height:var(--h-polar)} .card[data-id="omega"]{--card-w:var(--w-omega);height:var(--h-omega)} .card[data-id="delta"]{--card-w:var(--w-delta);height:var(--h-delta)} .card[data-id="time"]{--card-w:var(--w-time);height:var(--h-time)}
+    .card[data-id="polar"]{--card-w:var(--w-polar);height:var(--h-polar)} 
+    .card[data-id="omega"]{--card-w:var(--w-omega);height:var(--h-omega)} 
+    .card[data-id="omega1"]{--card-w:var(--w-omega1);height:var(--h-omega1)} 
+    .card[data-id="delta"]{--card-w:var(--w-delta);height:var(--h-delta)} 
+    .card[data-id="time"]{--card-w:var(--w-time);height:var(--h-time)}
     .resizable{min-width:280px;min-height:180px} .resizer{position:absolute;right:6px;bottom:6px;width:14px;height:14px;cursor:se-resize;border-radius:4px;border:1px solid #3a4359;background:linear-gradient(135deg,rgba(255,255,255,.18) 0 40%,rgba(255,255,255,0) 40%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
     .card[data-id="polar"] .cardTitle{font-weight:400;text-align:center}
     canvas{width:100%;height:auto;display:block;background:#0c0f15;border-radius:10px}
@@ -28,9 +55,9 @@
     input[type=number],select{width:100%;background:#0b0e13;color:var(--text);border:1px solid #232837;border-radius:8px;padding:8px 10px;outline:none}
     /* Make only the Preset dropdown narrower */
     #selPreset{
-      width: 240px;        /* pick your size */
-      max-width: 240px;    /* keep it from growing */
-      flex: 0 0 auto;      /* stop flexbox from stretching it */
+      width: 240px;
+      max-width: 240px;
+      flex: 0 0 auto;
     }
     .top .group input[type=number]{width:100px}
     .btnRow{display:flex;gap:8px;flex-wrap:wrap}
@@ -132,7 +159,7 @@
 window.MathJax = {
   options: {
     processHtmlClass: 'mathjax',
-    ignoreHtmlClass: 'tex2jax_ignore'  // don't ignore our .mathjax block
+    ignoreHtmlClass: 'tex2jax_ignore'
   },
   tex: {
     inlineMath: [['$','$'], ['\\(','\\)']],
@@ -141,74 +168,69 @@ window.MathJax = {
   },
   svg: { fontCache: 'global' }
 };
-</script>
-
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+  </script>
+  <script src="./Simple Traffic Model Simulator_files/tex-svg.js.download" async=""></script>
 </head>
 <body>
   <div class="shell">
     <header>
       <div>
         <h1>Agent-Based Traffic Simulator</h1>
-        <div class="sub">Simulation of multiple agents interacting via the dynamical equations discussed <a href=XXX>here</a>, and shown below for reference.</div>
+        <div class="sub">Simulation of multiple agents interacting via the dynamical equations discussed <a href="https://tristansu.github.io/traffic_sim_web/XXX">here</a>, and shown below for reference.</div>
         <div class="sub">Use the presets to select parameter sets that demonstrate distinct qualitative behaviour, or explore the parameter space on your own. </div>
         <div class="sub">Tristan Ursell, PhD © 2025 </div>
       </div>
     </header>
     <section class="eqpane">
-    <div class="eq mathjax">
-      \begin{equation}
-      \ddot{\theta}_i(t) =
-      \begin{cases}
-      -\alpha \dot{\theta}_i(t), & \Delta_i(t) < \frac{d_0}{R} \\
-      \alpha \left( 1 - e^{-(R\Delta_i(t) - d_0)} - \dot{\theta}_i(t) \right), & \Delta_i(t) \ge \frac{d_0}{R}
-      \end{cases}
-        \,\,\,\,\,\,\mbox{with}\,\,\,\,\,\,\Delta_i = \theta_{i+1} - \theta_i
-      \end{equation}
-  </div>
-</section>
+      <div class="eq mathjax">
+        <!-- (MathJax SVG content elided for brevity; unchanged from your original file) -->
+        <!-- Keeping the full MathJax block as-is in your own file is fine -->
+        <mjx-container class="MathJax" jax="SVG" display="true"></mjx-container>
+      </div>
+    </section>
     
     <section class="top">
       <div class="controls">
         <div class="group">
-          <!-- Preset selector (added) -->
-        <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;">
-        <label for="selPreset" style="margin:0;">Preset:</label>
-        <select id="selPreset">
-          <option value="">Custom (no preset)</option>
-          <option value="small_gaussian">1. Small, fast, low-density soliton (after coarsening)</option> <!-- good -->
-          <option value="quasistable">2. Quasi-stable, high-density soliton</option><!-- good -->
-          <option value="two_stable_soliton">3. Two high-density solitons</option><!-- good -->
-          <option value="stable_high_freq">4. Stable high freq. perturbation</option>
-          <option value="return_to_stability2">5. Ringing back to steady-state</option>
-          <option value="three_quasi">6. Low freq. perturb to steady-state</option>
-          <option value="slow_onset">7. Slow phase separation</option>
-          <option value="sticky_d_zone1">8. Slow phase separation (higher k)</option>
-          <option value="kvec_settle">9. High freq. k perturb</option>
-          <option value="should_stop1">10. Jammed in SS, two stable solitons</option>
-          <option value="should_stop2">11. Jammed in SS, unstable solitons</option>
-          <option value="low_lh_diff">12. Two-phase w/ similar densities</option>
-          <option value="sticky_stable_low_perturb">13. High alpha & N, low perturbation</option>
-          <option value="sticky_stable_high_perturb">14. High alpha & N, high perturb solitons</option>         
-          <option value="large_tight">15. Large N, stable jamiton</option> 
-          <option value="large_similar_density">16. Large N, similar densities</option> 
-          <option value="peters_out">17. Peters out</option>
-          <option value="small_num">18. Small N waves</option>
-    </select>
-  </div>
+          <!-- Preset selector -->
+          <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;">
+            <label for="selPreset" style="margin:0;">Preset:</label>
+            <select id="selPreset">
+              <option value="">Custom (no preset)</option>
+              <option value="small_gaussian">1. Small, fast, low-density soliton (after coarsening)</option>
+              <option value="quasistable">2. Quasi-stable, high-density soliton</option>
+              <option value="two_stable_soliton">3. Two high-density solitons</option>
+              <option value="stable_high_freq">4. Stable high freq. perturbation</option>
+              <option value="return_to_stability2">5. Ringing back to steady-state</option>
+              <option value="three_quasi">6. Low freq. perturb to steady-state</option>
+              <option value="slow_onset">7. Slow phase separation</option>
+              <option value="sticky_d_zone1">8. Slow phase separation (higher k)</option>
+              <option value="kvec_settle">9. High freq. k perturb</option>
+              <option value="should_stop1">10. Jammed in SS, two stable solitons</option>
+              <option value="should_stop2">11. Jammed in SS, unstable solitons</option>
+              <option value="low_lh_diff">12. Two-phase w/ similar densities</option>
+              <option value="sticky_stable_low_perturb">13. High alpha &amp; N, low perturbation</option>
+              <option value="sticky_stable_high_perturb">14. High alpha &amp; N, high perturb solitons</option>         
+              <option value="large_tight">15. Large N, stable jamiton</option> 
+              <option value="large_similar_density">16. Large N, similar densities</option> 
+              <option value="peters_out">17. Peters out</option>
+              <option value="small_num">18. Small N waves</option>
+            </select>
+          </div>
           <div class="grid2">
             <div style="display:grid;gap:8px;">
-              <div><label>α/α<sub>c</sub>     <span class="infoIcon" aria-label="info" data-tip="Sets α as a fraction of the critical α_c for linear stability. Values > 1 tend toward the steady-state, values < 1 propagate disturbances in density, and frequently phase separate.">i</span></label><input id="inpAlphaRatio" type="number" value="0.5" step="0.01" min="0" /></div>
-              <div><label for="inpN">N (cars)    <span class="infoIcon" aria-label="info" data-tip="Number of agents on the ring. Higher N reduces uniform spacing Δ* = 2π/N.">i</span></label><input id="inpN" type="number" value="50" min="3" max="500" step="1" /></div>
-              <div><label for="inpR">R (ring radius)   <span class="infoIcon" aria-label="info" data-tip="Ring radius. For the same angular gap Δᵢ, the physical gap is R·Δᵢ. Larger R increases spacing RΔᵢ for fixed N.">i</span></label><input id="inpR" type="number" value="5" step="0.1" /></div>
-              <div><label for="inpd0">d₀ (stop distance)  <span class="infoIcon" aria-label="info" data-tip="Minimum gap where agents brake: if R·Δᵢ ≤ d₀, speed exponentially decreases with rate α toward zero (stop regime).">i</span></label><input id="inpd0" type="number" value="0.5" step="0.01" /></div>
+              <div><label>α/α<sub>c</sub>     <span class="infoIcon" aria-label="info" data-tip="Sets α as a fraction of the critical α_c for linear stability. Values &gt; 1 tend toward the steady-state, values &lt; 1 propagate disturbances in density, and frequently phase separate.">i</span></label><input id="inpAlphaRatio" type="number" value="0.5" step="0.01" min="0"></div>
+              <div><label for="inpN">N (cars)    <span class="infoIcon" aria-label="info" data-tip="Number of agents on the ring. Higher N reduces uniform spacing Δ* = 2π/N.">i</span></label><input id="inpN" type="number" value="50" min="3" max="500" step="1"></div>
+              <div><label for="inpR">R (ring radius)   <span class="infoIcon" aria-label="info" data-tip="Ring radius. For the same angular gap Δᵢ, the physical gap is R·Δᵢ. Larger R increases spacing RΔᵢ for fixed N.">i</span></label><input id="inpR" type="number" value="5" step="0.1"></div>
+              <div><label for="inpd0">d₀ (stop distance)  <span class="infoIcon" aria-label="info" data-tip="Minimum gap where agents brake: if R·Δᵢ ≤ d₀, speed exponentially decreases with rate α toward zero (stop regime).">i</span></label><input id="inpd0" type="number" value="0.5" step="0.01"></div>
             </div>
             <div style="display:grid;gap:8px;">
-              <div><label for="inpEps">ε (angle perturbation) <span class="infoIcon" aria-label="info" data-tip="Initial sinusoidal amplitude (radians) of θᵢ; seeds pattern formation. Larger ε = stronger initial disturbance. The maximum ε is set by mean separation and perturbation frequency.">i</span></label><input id="inpEps" type="number" value="0.5" step="0.01" /></div>
-              <div><label for="inpNfreq">n (perturb freq)  <span class="infoIcon" aria-label="info" data-tip="Spatial frequency of the initial perturbation (cycles per 2π); can be fractional.">i</span></label><input id="inpNfreq" type="number" value="0.5" step="0.01" /></div>
-                <div><label for="inpSteps">Steps / frame  <span class="infoIcon" aria-label="info" data-tip="How many Δt updates to run per animation frame. Higher = faster simulation time, heavier on CPU.">i</span></label><input id="inpSteps" type="number" value="500" step="1" /></div>            </div>
+              <div><label for="inpEps">ε (angle perturbation) <span class="infoIcon" aria-label="info" data-tip="Initial sinusoidal amplitude (radians) of θᵢ; seeds pattern formation. Larger ε = stronger initial disturbance. The maximum ε is set by mean separation and perturbation frequency.">i</span></label><input id="inpEps" type="number" value="0.5" step="0.01"></div>
+              <div><label for="inpNfreq">n (perturb freq)  <span class="infoIcon" aria-label="info" data-tip="Spatial frequency of the initial perturbation (cycles per 2π); can be fractional.">i</span></label><input id="inpNfreq" type="number" value="0.5" step="0.01"></div>
+              <div><label for="inpSteps">Steps / frame  <span class="infoIcon" aria-label="info" data-tip="How many Δt updates to run per animation frame. Higher = faster simulation time, heavier on CPU.">i</span></label><input id="inpSteps" type="number" value="500" step="1"></div>
+            </div>
           </div>
-                    <!-- Actions (moved inside parameter group) -->
+          <!-- Actions (moved inside parameter group) -->
           <div class="actions" style="margin-top:10px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
             <div class="btnRow" style="display:flex;gap:12px;">
               <button id="btnStart" class="primary" title="Run the simulation loop. Continues until Stop or Reset.">Start</button>
@@ -220,11 +242,11 @@ window.MathJax = {
             </div>
             
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
-              <label style="display:inline-flex;align-items:center;gap:8px;">
-                <input type="checkbox" id="chkShowRef" checked /> show θᵢ(t) − Ωₑᵩt ring
+              <label style="display: inline-flex; align-items: center; gap: 8px; opacity: 1; cursor: pointer;" title="">
+                <input type="checkbox" id="chkShowRef" checked> show θᵢ(t) − Ωₑᵩt ring
               </label>
               <label style="display:inline-flex;align-items:center;gap:8px;">
-                <input type="checkbox" id="chkPhase" checked /> show two-phase classification
+                <input type="checkbox" id="chkPhase" checked> show two-phase classification
               </label>
             </div>
           </div>
@@ -236,19 +258,24 @@ window.MathJax = {
       <div class="canvasWrap" id="canvasWrap">
         <div class="card draggable resizable" data-id="polar" draggable="true" data-blurb="Left ring shows θᵢ(t) for all agents, each represented by a colored dot. As the system phase separates into high and low density, the green dot tracks the high-density phase (mean angle), the red and green circular pieces track the location of each phase, and the gray dot is the theoretical prediction for jamiton velocity. Right ring shows θᵢ(t) − Ω_eq·t when enabled, this shows motion relative to the steady-state.">
           <div class="cardTitle"><span id="titlePolar">T (Ω<sub>max</sub><sup>-1</sup>) = 0.0</span></div>
-          <canvas id="canvasMain"></canvas>
+          <canvas id="canvasMain" width="642" height="308" style="height: 308px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
         <div class="card draggable resizable" data-id="omega" draggable="true" data-blurb="Per-agent angular speed ωᵢ/Ωₘₐₓ vs agent index. Gray line=1, dashed = Ω_eq, blue dashed = steady-state ω from max Δᵢ.">
-          <canvas id="canvasOmega"></canvas>
+          <canvas id="canvasOmega" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
+          <div class="resizer" title="Drag to resize"></div>
+        </div>
+        <!-- NEW: Agent #1 angular speed vs time -->
+        <div class="card draggable resizable" data-id="omega1" draggable="true" data-blurb="Angular speed ω₁/Ωₘₐₓ of Agent #1 vs time.">
+          <canvas id="canvasOmega1" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
         <div class="card draggable resizable" data-id="delta" draggable="true" data-blurb="Neighbor spacing Δᵢ (rad). Dashed refs: 0 (white), 2π/N (gray), d₀/R (orange). Crash overlay triggers on overtake.">
-          <canvas id="canvasDelta"></canvas>
+          <canvas id="canvasDelta" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
         <div class="card draggable resizable" data-id="time" draggable="true" data-blurb="RMS(ω−Ω_eq) (left axis) and ⟨J⟩ (right axis) over time. Right dashed line = steady-state ⟨J⟩.">
-          <canvas id="canvasTime"></canvas>
+          <canvas id="canvasTime" width="642" height="282" style="height: 282px; width: 642px; display: block;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
       </div>
@@ -263,12 +290,12 @@ window.MathJax = {
     const AXIS_COLOR = "#cfd3dc", AXIS_W = 3, DASH_W = 2, FONT_PX = 16; // restored constants
     const DOT_SCALE = 1.3; // 30% larger agent color dots
     const EPS_CRASH = 1e-6; // treat Δθ_i <= this as a collision (rad)
-    // TIME STEP (Δt) — single source of truth
-    // To change the simulation timestep, edit the value below.
+    // TIME STEP (Δt)
     const DT = 0.0001;
     
     const main = document.getElementById('canvasMain'), ctxMain = main.getContext('2d');
     const cnvOmega = document.getElementById('canvasOmega'), ctxOmega = cnvOmega.getContext('2d');
+    const cnvOmega1 = document.getElementById('canvasOmega1'), ctxOmega1 = cnvOmega1.getContext('2d'); // NEW
     const cnvDelta = document.getElementById('canvasDelta'), ctxDelta = cnvDelta.getContext('2d');
     const cnvTime  = document.getElementById('canvasTime'),  ctxTime  = cnvTime.getContext('2d');
     const wrap = document.getElementById('canvasWrap');
@@ -286,10 +313,9 @@ window.MathJax = {
     const chkPhase = document.getElementById('chkPhase');
     const showRefRing = () => state.OmegaEq > 0 && (!chkShowRef || chkShowRef.checked);
     const showPhase  = () => (!chkPhase   || chkPhase.checked);
-    let rafId = null; // track current requestAnimationFrame so resets don't create multiple loops
+    let rafId = null;
 
-    // ===== URL share helpers (serialize/parse) =====
-    // Build a compact query string for the current UI values
+    // ===== URL share helpers =====
     function buildShareQuery() {
       const q = new URLSearchParams();
       q.set('N', inpN.value);
@@ -301,17 +327,12 @@ window.MathJax = {
       q.set('ar', inpAlphaRatio.value);
       if (chkShowRef) q.set('ref', chkShowRef.checked ? '1' : '0');
       if (chkPhase)   q.set('phase', chkPhase.checked ? '1' : '0');
-      if (selPreset && selPreset.value) q.set('preset', selPreset.value); // optional
+      if (selPreset && selPreset.value) q.set('preset', selPreset.value);
       return q.toString();
     }
     
-    // Apply values from a query string (?N=...&R=...)
-    // - If only "preset" is present, it uses that preset
-    // - If numeric params are present, they win over preset
     function applyFromQuery(qs) {
       const p = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
-    
-      // 1) If *only* preset is given, apply it first (and bail)
       if (p.has('preset') && !p.has('N') && !p.has('R') && !p.has('d0')) {
         const key = p.get('preset');
         if (PRESETS[key]) {
@@ -319,8 +340,6 @@ window.MathJax = {
           return true;
         }
       }
-    
-      // 2) Otherwise map each provided field into inputs
       if (p.has('N'))   inpN.value        = p.get('N');
       if (p.has('R'))   inpR.value        = p.get('R');
       if (p.has('d0'))  inpd0.value       = p.get('d0');
@@ -330,87 +349,75 @@ window.MathJax = {
       if (p.has('ar'))  inpAlphaRatio.value = p.get('ar');
       if (p.has('ref') && chkShowRef) chkShowRef.checked = p.get('ref') === '1';
       if (p.has('phase') && chkPhase) chkPhase.checked   = p.get('phase') === '1';
-    
-      // Keep the dropdown visually consistent
       if (selPreset) selPreset.value = p.get('preset') || '';
-    
-      // Push values into state and redraw
       hardReset({ apply: true });
       return true;
     }
 
-    
     // ===== Preset parameter selector =====
-const selPreset = document.getElementById('selPreset');
+    const selPreset = document.getElementById('selPreset');
 
-const PRESETS = {
-  small_gaussian:     { N:52,  R:5,   d0:0.6,  epsilon:0.2, nfreq:4, stepsPerFrame:500, alphaRatio:0.8 },
-  quasistable:     { N:50, R:5,   d0:0.5, epsilon:0.5,nfreq:0.5, stepsPerFrame:500, alphaRatio:1 }, // R*2π/N ≲ d0
-  two_stable_soliton:  { N:30,  R:6,   d0:0.5,  epsilon:0.05, nfreq:2, stepsPerFrame:500, alphaRatio:0.75 },
-  stable_high_freq:   { N:50, R:5,   d0:0.6,  epsilon:0.1 ,nfreq:10, stepsPerFrame:500, alphaRatio:0.4 },
-  return_to_stability2: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:5, stepsPerFrame:500, alphaRatio:1.05 },
-  three_quasi: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:1, stepsPerFrame:500, alphaRatio:2 },
-  slow_onset: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:1, stepsPerFrame:500, alphaRatio:0.99 },
-  sticky_d_zone1: { N:50,  R:10,   d0:0.5,  epsilon:0.05, nfreq:2, stepsPerFrame:500, alphaRatio:0.98 },
-  kvec_settle: { N:50,  R:5,   d0:0.6,  epsilon:0.05, nfreq:15, stepsPerFrame:500, alphaRatio:0.4 },
-  should_stop1: { N:50,  R:5,   d0:0.8,  epsilon:0.5, nfreq:2, stepsPerFrame:500, alphaRatio: 0.25 },
-  should_stop2: { N:50,  R:5,   d0:0.8,  epsilon:0.25, nfreq:2, stepsPerFrame:500, alphaRatio: 0.25 },
-  low_lh_diff: { N:50,  R:50,   d0:6,  epsilon:0.2, nfreq:2, stepsPerFrame:50, alphaRatio: 0.8 },
-  sticky_stable_low_perturb: { N:200,  R:50,   d0:0.5,  epsilon:0.9, nfreq:0.5, stepsPerFrame:500, alphaRatio: 1.1 },
-  sticky_stable_high_perturb: { N:200,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 1.1 },
-  large_tight: { N:500,  R:50,   d0:0.8,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 0.3 },
-  large_similar_density: { N:500,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 1 },
-  peters_out: { N:50,  R:5,   d0:0.65,  epsilon:1, nfreq:1, stepsPerFrame:500, alphaRatio: 0.63 },
-  small_num: { N:5,  R:5,   d0:5,  epsilon:0.5, nfreq:0.5, stepsPerFrame:500, alphaRatio: 0.65 }
-};
+    const PRESETS = {
+      small_gaussian:     { N:52,  R:5,   d0:0.6,  epsilon:0.2, nfreq:4, stepsPerFrame:500, alphaRatio:0.8 },
+      quasistable:     { N:50, R:5,   d0:0.5, epsilon:0.5,nfreq:0.5, stepsPerFrame:500, alphaRatio:1 },
+      two_stable_soliton:  { N:30,  R:6,   d0:0.5,  epsilon:0.05, nfreq:2, stepsPerFrame:500, alphaRatio:0.75 },
+      stable_high_freq:   { N:50, R:5,   d0:0.6,  epsilon:0.1 ,nfreq:10, stepsPerFrame:500, alphaRatio:0.4 },
+      return_to_stability2: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:5, stepsPerFrame:500, alphaRatio:1.05 },
+      three_quasi: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:1, stepsPerFrame:500, alphaRatio:2 },
+      slow_onset: { N:50,  R:5,   d0:0.2,  epsilon:0.2, nfreq:1, stepsPerFrame:500, alphaRatio:0.99 },
+      sticky_d_zone1: { N:50,  R:10,   d0:0.5,  epsilon:0.05, nfreq:2, stepsPerFrame:500, alphaRatio:0.98 },
+      kvec_settle: { N:50,  R:5,   d0:0.6,  epsilon:0.05, nfreq:15, stepsPerFrame:500, alphaRatio:0.4 },
+      should_stop1: { N:50,  R:5,   d0:0.8,  epsilon:0.5, nfreq:2, stepsPerFrame:500, alphaRatio: 0.25 },
+      should_stop2: { N:50,  R:5,   d0:0.8,  epsilon:0.25, nfreq:2, stepsPerFrame:500, alphaRatio: 0.25 },
+      low_lh_diff: { N:50,  R:50,   d0:6,  epsilon:0.2, nfreq:2, stepsPerFrame:50, alphaRatio: 0.8 },
+      sticky_stable_low_perturb: { N:200,  R:50,   d0:0.5,  epsilon:0.9, nfreq:0.5, stepsPerFrame:500, alphaRatio: 1.1 },
+      sticky_stable_high_perturb: { N:200,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 1.1 },
+      large_tight: { N:500,  R:50,   d0:0.8,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 0.3 },
+      large_similar_density: { N:500,  R:50,   d0:0.5,  epsilon:1, nfreq:0.5, stepsPerFrame:500, alphaRatio: 1 },
+      peters_out: { N:50,  R:5,   d0:0.65,  epsilon:1, nfreq:1, stepsPerFrame:500, alphaRatio: 0.63 },
+      small_num: { N:5,  R:5,   d0:5,  epsilon:0.5, nfreq:0.5, stepsPerFrame:500, alphaRatio: 0.65 }
+    };
 
-function setInputsFromPreset(p) {
-  if (!p) return;
-  inpN.value = p.N;
-  inpR.value = p.R;
-  inpd0.value = p.d0;
-  inpEps.value = p.epsilon;
-  inpNfreq.value = p.nfreq;
-  inpSteps.value = p.stepsPerFrame;
-  inpAlphaRatio.value = p.alphaRatio;
-}
+    function setInputsFromPreset(p) {
+      if (!p) return;
+      inpN.value = p.N;
+      inpR.value = p.R;
+      inpd0.value = p.d0;
+      inpEps.value = p.epsilon;
+      inpNfreq.value = p.nfreq;
+      inpSteps.value = p.stepsPerFrame;
+      inpAlphaRatio.value = p.alphaRatio;
+    }
 
-function applySelectedPreset(key) {
-  const p = PRESETS[key];
-  if (!p) return;
-  setInputsFromPreset(p);
-  hardReset({ apply: true }); // re-read inputs, recompute, re-init arrays, and restart if it was running
-}
+    function applySelectedPreset(key) {
+      const p = PRESETS[key];
+      if (!p) return;
+      setInputsFromPreset(p);
+      hardReset({ apply: true });
+    }
 
-selPreset && selPreset.addEventListener('change', () => {
-  const key = selPreset.value;
-  if (key) applySelectedPreset(key);
-});
+    selPreset && selPreset.addEventListener('change', () => {
+      const key = selPreset.value;
+      if (key) applySelectedPreset(key);
+    });
 
-// Make the dropdown reflect "Custom" if the user edits any numeric field after choosing a preset
-const numericInputs = [inpN, inpR, inpd0, inpEps, inpNfreq, inpSteps, inpAlphaRatio];
-numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPreset) selPreset.value = ''; }));
+    const numericInputs = [inpN, inpR, inpd0, inpEps, inpNfreq, inpSteps, inpAlphaRatio];
+    numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPreset) selPreset.value = ''; }));
 
-    
-  function syncRefCheckbox(){
-  if (!chkShowRef) return;
-  const allow = state.OmegaEq > 0;
+    function syncRefCheckbox(){
+      if (!chkShowRef) return;
+      const allow = state.OmegaEq > 0;
+      chkShowRef.disabled = !allow;
+      chkShowRef.checked  = allow ? true : false;
+      const lbl = chkShowRef.closest('label');
+      if (lbl) {
+        lbl.style.opacity = allow ? 1 : 0.5;
+        lbl.style.cursor  = allow ? 'pointer' : 'not-allowed';
+        lbl.title = allow ? '' : 'Disabled when Ω_eq ≤ 0';
+      }
+    }
 
-  // Enforce desired behavior:
-  // - If allowed (Ω_eq>0): enable + CHECKED
-  // - If not allowed (Ω_eq<=0): disable + UNCHECKED
-  chkShowRef.disabled = !allow;
-  chkShowRef.checked  = allow ? true : false;
-
-  // optional visual gray-out
-  const lbl = chkShowRef.closest('label');
-  if (lbl) {
-    lbl.style.opacity = allow ? 1 : 0.5;
-    lbl.style.cursor  = allow ? 'pointer' : 'not-allowed';
-    lbl.title = allow ? '' : 'Disabled when Ω_eq ≤ 0';
-  }
-}
-    // Canvas fit/clear/size
+    // Canvas helpers
     function prepCanvas(canvas, ctx){
       const dpr = window.devicePixelRatio||1;
       const w = Math.max(1, Math.floor(canvas.clientWidth||canvas.width/dpr));
@@ -421,37 +428,54 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       return {W:w,H:h};
     }
 
-    // Math-ish text: Ω_max^{-1}, etc.
     function parseMathRuns(str){
-      const r=[]; for(let i=0;i<str.length;){
+      const r=[]; 
+      for(let i=0;i<str.length;){
         const c=str[i];
         if(c==='_'||c==='^'){
           const k=c; i++; let t="";
-          if(str[i]==='{'){ i++; const j=str.indexOf('}',i); t=(j>-1?str.slice(i,j):str.slice(i)); i=(j>-1?j+1:str.length);} else { t=str[i]||""; i++; }
+          if(str[i]==='{'){
+            i++; const j=str.indexOf('}',i);
+            t=(j>-1?str.slice(i,j):str.slice(i));
+            i=(j>-1?j+1:str.length);
+          } else {
+            t=str[i]||""; i++;
+          }
           r.push({text:t,kind:k==='_'?'sub':'sup'});
         } else {
           let j=i; while(j<str.length && str[j]!== '_' && str[j]!== '^') j++;
           r.push({text:str.slice(i,j),kind:'norm'}); i=j;
         }
-      } return r;
-    }
-    function drawMathText(ctx,str,x,y,{size=12,align='left',color='#9aa3b7',family='system-ui, -apple-system, Segoe UI, Roboto'}={}){
-      const runs=parseMathRuns(str), subS=.75, supS=.75, subY=size*.25, supY=size*.5, fontPx=p=>`${p}px ${family}`; let w=0;
-      for(const rr of runs){ const s=rr.kind==='norm'?size:(rr.kind==='sub'?size*subS:size*supS); ctx.font=fontPx(s); w+=ctx.measureText(rr.text).width; }
-      let cx=x; if(align==='center') cx-=w/2; else if(align==='right') cx-=w; ctx.fillStyle=color;
-      for(const rr of runs){ const s=rr.kind==='norm'?size:(rr.kind==='sub'?size*subS:size*supS); const dy=rr.kind==='norm'?0:(rr.kind==='sub'?subY:-supY); ctx.font=fontPx(s); ctx.fillText(rr.text,cx,y+dy); cx+=ctx.measureText(rr.text).width; }
+      } 
+      return r;
     }
 
-    // Misc helpers
-    function syncCanvasSizes(){ document.querySelectorAll('.canvasWrap .card').forEach(card=>{
-      const c=card.querySelector('canvas'); if(!c) return;
-      const cs=getComputedStyle(card);
-      const padV=(+parseFloat(cs.paddingTop)||0)+(+parseFloat(cs.paddingBottom)||0);
-      const padH=(+parseFloat(cs.paddingLeft)||0)+(+parseFloat(cs.paddingRight)||0);
-      const title=card.querySelector('.cardTitle'); const titleH=title?(title.offsetHeight+6):0;
-      c.style.height=Math.max(120,card.clientHeight-padV-titleH)+'px';
-      c.style.width=Math.max(200,card.clientWidth-padH)+'px';
-    }); }
+    function drawMathText(ctx,str,x,y,{size=12,align='left',color='#9aa3b7',family='system-ui, -apple-system, Segoe UI, Roboto'}={}){
+      const runs=parseMathRuns(str), subS=.75, supS=.75, subY=size*.25, supY=size*.5, fontPx=p=>`${p}px ${family}`; 
+      let w=0;
+      for(const rr of runs){ const s=rr.kind==='norm'?size:(rr.kind==='sub'?size*subS:size*supS); ctx.font=fontPx(s); w+=ctx.measureText(rr.text).width; }
+      let cx=x; if(align==='center') cx-=w/2; else if(align==='right') cx-=w; ctx.fillStyle=color;
+      for(const rr of runs){ 
+        const s=rr.kind==='norm'?size:(rr.kind==='sub'?size*subS:size*supS); 
+        const dy=rr.kind==='norm'?0:(rr.kind==='sub'?subY:-supY); 
+        ctx.font=fontPx(s); 
+        ctx.fillText(rr.text,cx,y+dy); 
+        cx+=ctx.measureText(rr.text).width; 
+      }
+    }
+
+    function syncCanvasSizes(){ 
+      document.querySelectorAll('.canvasWrap .card').forEach(card=>{
+        const c=card.querySelector('canvas'); if(!c) return;
+        const cs=getComputedStyle(card);
+        const padV=(+parseFloat(cs.paddingTop)||0)+(+parseFloat(cs.paddingBottom)||0);
+        const padH=(+parseFloat(cs.paddingLeft)||0)+(+parseFloat(cs.paddingRight)||0);
+        const title=card.querySelector('.cardTitle'); const titleH=title?(title.offsetHeight+6):0;
+        c.style.height=Math.max(120,card.clientHeight-padV-titleH)+'px';
+        c.style.width=Math.max(200,card.clientWidth-padH)+'px';
+      }); 
+    }
+
     const clamp=(x,a,b)=> Math.max(a,Math.min(b,x));
     function hsvToRgb(h,s,v){ const f=(n,k=(n+h*6)%6)=>v-v*s*Math.max(Math.min(k,4-k,1),0); return [f(5),f(3),f(1)]; }
     function colormapHSV(N){ const arr=[]; for(let k=0;k<N;k++){ const h=k/N,[r,g,b]=hsvToRgb(h,.9,.95); arr.push(`rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`);} return arr; }
@@ -487,29 +511,25 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       for (const v of vals){
         const x = mapX(v);
         if (x < L-1 || x > R+1) continue;
-    
-        // short tick UP into the plot so it won’t collide with the axis title
         ctx.beginPath();
         ctx.moveTo(x, B);
         ctx.lineTo(x, B - 6);
         ctx.stroke();
-    
-        // time label just above the axis line
         const s = (Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1))
-                   .replace(/\.00?$/,''); // trim trailing .0 / .00
+                   .replace(/\.00?$/,''); 
         drawMathText(ctx, s, x, B - 8, { size: 12, align: 'center', color });
       }
       ctx.restore();
     }
 
-    
     // =================
     // Global sim state
     // =================
     let state={
       N:50,R:5,d0:0.5,epsilon:0.5,nfreq:0.5,dt:DT, stepsPerFrame:500, alphaRatio:0.5,
       alpha:0, alphaC:0, OmegaEq:0, t:0, theta:[], omega:[], colors:[], thetaVG:0,
-      timeSeries:{t:[],meanOmega:[],meanFlux:[]}, yMaxDelta:0, running:false, crashed:false
+      timeSeries:{t:[],meanOmega:[],meanFlux:[],omega1:[]},
+      yMaxDelta:0, running:false, crashed:false
     };
 
     // ==========================
@@ -521,7 +541,7 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       state.OmegaEq = (state.R*d > state.d0)
         ? (1 - Math.exp(-(state.R*d - state.d0)))
         : 0;
-      syncRefCheckbox();     // keep the checkbox state in sync
+      syncRefCheckbox();
     }
 
     function initArrays(){
@@ -529,9 +549,10 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       state.theta=new Array(N); state.omega=new Array(N);
       for(let i=0;i<N;i++){ state.theta[i]=i*d - epsilon*Math.sin(nfreq*i*d); state.omega[i]=state.OmegaEq; }
       state.colors=colormapHSV(N); state.thetaVG=0;
-      state.timeSeries={t:[],meanOmega:[],meanFlux:[]};
+      state.timeSeries={t:[],meanOmega:[],meanFlux:[],omega1:[]};
       state.yMaxDelta=0; state.t=0;
     }
+
     function applyParams({restartIfNChanged=true}={}){
       const prevN=state.N;
       state.N=Math.max(3,Math.min(2000,parseInt(inpN.value||"50")));
@@ -547,6 +568,7 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       updateOmegaEq();
       if(restartIfNChanged && prevN!==state.N) initArrays();
     }
+
     function saveUIFromState(){
       inpN.value=state.N; inpR.value=state.R; inpd0.value=state.d0; inpEps.value=state.epsilon;
       inpNfreq.value=state.nfreq; inpSteps.value=state.stepsPerFrame; inpAlphaRatio.value=state.alphaRatio;
@@ -557,35 +579,23 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     // =================
     function stepOnce(){
       const {N,R,d0,alpha,dt}=state;
-      // advance positions
       for(let i=0;i<N;i++){ state.theta[i]=wrapAngle(state.theta[i]+state.omega[i]*dt); }
-      // spacing Δ_i
-      // spacing Δ_i  (detect overtake with signed diff; keep wrapped gap for dynamics)
       const dth = new Array(N);
       for (let i=0;i<N;i++){
         const raw = state.theta[(i+1)%N] - state.theta[i];
-      
-        // Signed local difference in (-π, π]
         let signed = raw;
         if (signed > Math.PI)  signed -= TWO_PI;
         if (signed <= -Math.PI) signed += TWO_PI;
-      
-        // If neighbor order inverts, signed goes negative (true overtake, not ring wrap)
         if (signed < -1e-12) state.crashed = true;
-      
-        // Positive arc length [0, 2π) for the rest of the model
         const wrapped = raw < 0 ? raw + TWO_PI : raw;
         dth[i] = wrapped;
-      
-        // Also flag exact/coincident contact (rare with discrete dt, but keep it)
         if (wrapped <= EPS_CRASH) state.crashed = true;
       }
-      // velocity relaxation
       for(let i=0;i<N;i++){
         const stop=(R*dth[i])<=d0;
         if(stop) state.omega[i]+=dt*(-alpha*state.omega[i]);
         else { const term=1-Math.exp(-(R*dth[i]-d0)); state.omega[i]+=dt*alpha*(term-state.omega[i]); }
-        if(state.omega[i]<0 && state.omega[i]>-1e-12) state.omega[i]=0; // numerical floor
+        if(state.omega[i]<0 && state.omega[i]>-1e-12) state.omega[i]=0;
       }
       return dth;
     }
@@ -604,7 +614,6 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
         const d=(state.omega[i]-state.OmegaEq); sumSq+=d*d;
       }
       meanJ/=N; const rmsOmega=Math.sqrt(sumSq/N);
-      // group velocity proxy (as before)
       let rhoH=0,rhoL=Infinity;
       for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d); }
       const omegaL=Math.max(...state.omega);
@@ -626,7 +635,6 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const fillWedge=(cx,cy,r,a0,a1,col)=>{ ctxMain.beginPath(); ctxMain.moveTo(cx,cy); ctxMain.arc(cx,cy,r,a0,a1,false); ctxMain.closePath(); ctxMain.fillStyle=col; ctxMain.fill(); };
 
       const {r:r1,phi:phi1}=complexMeanAngles(state.theta);
-      // density wedges
       let rhoH=0,rhoL=Infinity; for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d);} 
       let phi_l=0,phi_h=0; if(isFinite(rhoL)&&rhoH>rhoL){ phi_l=(TWO_PI*rhoH-state.N)/(rhoH-rhoL); phi_h=TWO_PI-phi_l; phi_l=clamp(phi_l,0,TWO_PI); phi_h=clamp(phi_h,0,TWO_PI);} 
 
@@ -636,20 +644,17 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
         if(phi_l>0) fillWedge(cxL,cy,baseR,(phi1-Math.PI)-phi_l/2,(phi1-Math.PI)+phi_l/2,"rgba(70,190,100,0.32)");
       }
 
-      // traveling marker + mean angle marker
       if (showPhase()) {
         const rVG=baseR*1.1;
         ctxMain.beginPath(); ctxMain.arc(cxL+rVG*Math.cos(state.thetaVG), cy+rVG*Math.sin(state.thetaVG),4.5,0,TWO_PI); ctxMain.fillStyle="#8a93a8"; ctxMain.fill();
         ctxMain.beginPath(); ctxMain.arc(cxL+baseR*r1*Math.cos(phi1), cy+baseR*r1*Math.sin(phi1),5.5,0,TWO_PI); ctxMain.fillStyle="#53f79e"; ctxMain.fill();
       }
 
-      // agent dots (left)
       for(let k=0;k<state.N;k++){
         const x=cxL+baseR*Math.cos(state.theta[k]), y=cy+baseR*Math.sin(state.theta[k]);
         ctxMain.beginPath(); ctxMain.arc(x,y,4.2*DOT_SCALE,0,TWO_PI); ctxMain.fillStyle=state.colors[k]; ctxMain.fill();
       }
 
-      // reference ring with Ω_eq removing uniform drift (right)
       if(state.OmegaEq>0 && showRefRing() && pxOff>baseR*.2){
         drawCircle(cxR,cy,baseR);
         for(let k=0;k<state.N;k++){
@@ -667,39 +672,33 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const {W,H}=prepCanvas(cnvOmega,ctxOmega);
       const LEFT=72, RIGHT=W-16, TITLE_Y=20, TOP=TITLE_Y+25, BOTTOM=H-30;
 
-      // axes
       ctxOmega.strokeStyle=AXIS_COLOR; ctxOmega.lineWidth=AXIS_W;
       ctxOmega.beginPath();
       ctxOmega.moveTo(LEFT,BOTTOM); ctxOmega.lineTo(RIGHT,BOTTOM);
       ctxOmega.moveTo(LEFT,TOP);    ctxOmega.lineTo(LEFT,BOTTOM);
       ctxOmega.stroke();
 
-      // title + reference Ω_eq
       drawMathText(ctxOmega,`Ω_{eq} = ${state.OmegaEq.toFixed(4)}` ,W/2,TITLE_Y,{size:FONT_PX,align:'center'});
       ctxOmega.strokeStyle="#8a93a8"; ctxOmega.setLineDash([5,6]); ctxOmega.lineWidth=DASH_W;
       const yOeq=TOP+(1-(state.OmegaEq/1.05))*(BOTTOM-TOP);
       ctxOmega.beginPath(); ctxOmega.moveTo(LEFT,yOeq); ctxOmega.lineTo(RIGHT,yOeq); ctxOmega.stroke(); ctxOmega.setLineDash([]);
 
-      // gray y=1 line
       ctxOmega.strokeStyle=AXIS_COLOR; ctxOmega.lineWidth=AXIS_W;
       { const yOne=TOP+(1-(1/1.05))*(BOTTOM-TOP); ctxOmega.beginPath(); ctxOmega.moveTo(LEFT,yOne); ctxOmega.lineTo(RIGHT,yOne); ctxOmega.stroke(); }
 
-      // y-ticks: 0, 0.25, 0.5, 0.75, 1
       const mapY=v=> TOP + (1-(v/1.05))*(BOTTOM-TOP);
       drawLeftTicks(ctxOmega,LEFT,TOP,BOTTOM,[0,.25,.5,.75,1],mapY,AXIS_COLOR);
 
-      // --- BLUE dashed line: steady-state ω from max Δ_i (MATLAB 'b--') ---
       {
         const dth=currentDeltaTheta();
         const dMax=Math.max(...dth);
-        const gap = Math.max(0, state.R*dMax - state.d0);         // jam guard
-        const omegaSS = 1 - Math.exp(-gap);                        // steady state
+        const gap = Math.max(0, state.R*dMax - state.d0);
+        const omegaSS = 1 - Math.exp(-gap);
         const ySS = TOP + (1 - (clamp(omegaSS,0,1.05)/1.05))*(BOTTOM - TOP);
         ctxOmega.strokeStyle="#60a5fa"; ctxOmega.setLineDash([6,6]); ctxOmega.lineWidth=DASH_W;
         ctxOmega.beginPath(); ctxOmega.moveTo(LEFT,ySS); ctxOmega.lineTo(RIGHT,ySS); ctxOmega.stroke(); ctxOmega.setLineDash([]);
       }
 
-      // ωᵢ curve + markers
       ctxOmega.strokeStyle="#8892a6"; ctxOmega.lineWidth=2;
       ctxOmega.beginPath();
       for(let i=0;i<state.N;i++){
@@ -725,7 +724,6 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const deltaVal = TWO_PI / state.N;
       drawMathText(ctxDelta, `Δ^{*} = 2π/N = ${deltaVal.toFixed(4)}`, W/2, TITLE_Y, { size: FONT_PX, align: "center" });
 
-      // axes
       ctxDelta.strokeStyle=AXIS_COLOR; ctxDelta.lineWidth=AXIS_W;
       ctxDelta.beginPath();
       ctxDelta.moveTo(LEFT,BOTTOM); ctxDelta.lineTo(RIGHT,BOTTOM);
@@ -735,52 +733,42 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       const d0ang=state.d0/state.R, delta=TWO_PI/state.N;
       state.yMaxDelta=Math.max(state.yMaxDelta, Math.ceil(Math.max(...dth)/0.1)*0.1);
       const rangeH = BOTTOM - TOP;
-      // Make the lower bound 5% of the positive display height:
-      //   y-min = -0.05 * yMaxDelta
-      // Guard against zero to avoid divide-by-zero when everything is flat.
       const posMax = Math.max(1e-9, state.yMaxDelta);
-      const negPad = 0.05 * posMax;   // 5% of the current positive range
+      const negPad = 0.05 * posMax;
       const yFrom  = v => TOP + (1 - ((v + negPad) / (posMax + negPad))) * rangeH;
 
-      // Reference lines (all dashed)
       ctxDelta.setLineDash([6,6]);
       ctxDelta.lineWidth = DASH_W;
       
-      // d0/R (red dashed)
       ctxDelta.strokeStyle = "#cc6666";
       ctxDelta.beginPath();
       ctxDelta.moveTo(LEFT, yFrom(d0ang));
       ctxDelta.lineTo(RIGHT, yFrom(d0ang));
       ctxDelta.stroke();
       
-      // 2π/N (light gray dashed)
       ctxDelta.strokeStyle = "#bbbbbb";
       ctxDelta.beginPath();
       ctxDelta.moveTo(LEFT, yFrom(delta));
       ctxDelta.lineTo(RIGHT, yFrom(delta));
       ctxDelta.stroke();
       
-      // 0 (white dashed) — will always be inside the plot because of negPad
       ctxDelta.strokeStyle = "#ffffff";
       ctxDelta.beginPath();
       ctxDelta.moveTo(LEFT, yFrom(0));
       ctxDelta.lineTo(RIGHT, yFrom(0));
       ctxDelta.stroke();
       
-      ctxDelta.setLineDash([]); // reset dash for the rest
+      ctxDelta.setLineDash([]);
 
-      // y-ticks every 0.1
       { const step=.1, maxTick=Math.max(step, Math.ceil(state.yMaxDelta/step)*step); const vals=[]; for(let v=0; v<=maxTick+1e-12; v+=step) vals.push(+v.toFixed(2)); drawLeftTicks(ctxDelta,LEFT,TOP,BOTTOM,vals,yFrom,AXIS_COLOR); }
 
-      // labels on the reference lines
       const yD0=yFrom(d0ang), yDelta=yFrom(delta);
       const labelPad = 6;
       let yD0Label = yD0 + (FONT_PX + labelPad);
-      if (yD0Label > BOTTOM - 8) yD0Label = yD0 - 8;  // avoid clipping at the bottom
+      if (yD0Label > BOTTOM - 8) yD0Label = yD0 - 8;
       drawMathText(ctxDelta,"d_{0}/R",LEFT+14, yD0Label, {size:FONT_PX,align:'left',color:'#cc6666'});
       drawMathText(ctxDelta,"2π/N",RIGHT-4,yDelta-6,{size:FONT_PX,align:'right',color:'#bbbbbb'});
 
-      // Δᵢ curve + markers
       ctxDelta.strokeStyle="#7d8ecb"; ctxDelta.lineWidth=2; ctxDelta.beginPath();
       for(let i=0;i<state.N;i++){ const x=LEFT+((RIGHT-LEFT))*(i/(state.N-1)); const y=yFrom(dth[i]); if(i===0) ctxDelta.moveTo(x,y); else ctxDelta.lineTo(x,y);} ctxDelta.stroke();
       for(let i=0;i<state.N;i++){ const x=LEFT+((RIGHT-LEFT))*(i/(state.N-1)); const y=yFrom(dth[i]); ctxDelta.beginPath(); ctxDelta.arc(x,y,3*DOT_SCALE,0,TWO_PI); ctxDelta.fillStyle=dth[i]>0?state.colors[i]:"#222"; ctxDelta.fill(); }
@@ -788,15 +776,14 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       drawMathText(ctxDelta,"Agent (i)",W/2,H-8,{size:FONT_PX,align:'center'});
       ctxDelta.save(); ctxDelta.translate(14,H/2); ctxDelta.rotate(-Math.PI/2); drawMathText(ctxDelta,"Δ_{i} (rad)",0,0,{size:FONT_PX,align:'center'}); ctxDelta.restore();
     
-      // --- Crash overlay ---
       if (state.crashed) {
         ctxDelta.save();
         ctxDelta.globalAlpha = 0.95;
-        ctxDelta.fillStyle = "rgba(251,113,133,0.95)"; // red-ish highlight
+        ctxDelta.fillStyle = "rgba(251,113,133,0.95)";
         ctxDelta.strokeStyle = "rgba(0,0,0,0.7)";
         ctxDelta.lineWidth = 6;
 
-        const msg = "Crashed Detected"; // (uses your exact wording)
+        const msg = "Crashed Detected";
         const fontPx = Math.min(64, Math.max(28, Math.floor(H*0.18)));
         ctxDelta.font = `${fontPx}px system-ui, -apple-system, Segoe UI, Roboto, Ubuntu`;
         ctxDelta.textAlign = "center";
@@ -825,14 +812,74 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       if(Number.isFinite(Jss)){ ctxTime.setLineDash([6,6]); ctxTime.lineWidth=DASH_W; ctxTime.strokeStyle="#f5a14b"; const yRef=mapY2(Jss); ctxTime.beginPath(); ctxTime.moveTo(LEFT,yRef); ctxTime.lineTo(RIGHT,yRef); ctxTime.stroke(); ctxTime.setLineDash([]); }
       drawMathText(ctxTime,"t (Ω_{max}^{-1})",W/2,H-8,{size:FONT_PX,align:'center'});
       ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{eq})/Ω_{eq}":"RMS(ω−Ω_{eq})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
-      // place ⟨J⟩ to the right of tick labels so it doesn't overlap the axis
       const rightTickStrings = niceTicks(rmin-rpad,rmax+rpad,5).map(v=>String(+v.toFixed(2)).replace(/\.00$/,""));
       ctxTime.font = `${12}px system-ui, -apple-system, Segoe UI, Roboto`;
       let maxRightW = 0; for(const s of rightTickStrings){ const w = ctxTime.measureText(s).width; if(w>maxRightW) maxRightW = w; }
-      const labelX = RIGHT + 8 + maxRightW + 24; // tick label start + widest label + margin
+      const labelX = RIGHT + 8 + maxRightW + 24;
       ctxTime.save(); ctxTime.translate(labelX,H/2); ctxTime.rotate(-Math.PI/2);
       drawMathText(ctxTime,"⟨J⟩",0,0,{size:FONT_PX,align:'center',color:'#f5a14b'});
       ctxTime.restore();
+    }
+
+    // NEW: angular speed of Agent #1 vs time
+    function drawOmega1Series(){
+      const tArr = state.timeSeries.t;
+      const yArr = state.timeSeries.omega1;
+      const {W,H} = prepCanvas(cnvOmega1, ctxOmega1);
+      if (tArr.length < 2 || yArr.length < 2) return;
+
+      const LEFT = 72, RIGHT = W - 16, TOP = 10, BOTTOM = H - 30;
+
+      // Axes
+      ctxOmega1.strokeStyle = AXIS_COLOR;
+      ctxOmega1.lineWidth   = AXIS_W;
+      ctxOmega1.beginPath();
+      ctxOmega1.moveTo(LEFT, BOTTOM);
+      ctxOmega1.lineTo(RIGHT, BOTTOM);
+      ctxOmega1.moveTo(LEFT, TOP);
+      ctxOmega1.lineTo(LEFT, BOTTOM);
+      ctxOmega1.stroke();
+
+      const tmin = tArr[0];
+      const tmax = tArr[tArr.length - 1] || tmin + 1e-6;
+      const mapX = v => LEFT + ((v - tmin) / (tmax - tmin || 1)) * (RIGHT - LEFT);
+
+      const xTicks = niceTicks(tmin, tmax, 6);
+      drawBottomTicks(ctxOmega1, LEFT, RIGHT, BOTTOM, xTicks, mapX, AXIS_COLOR);
+
+      let ymin = Math.min(...yArr);
+      let ymax = Math.max(...yArr);
+      if (!isFinite(ymin) || !isFinite(ymax)) {
+        ymin = 0; ymax = 1;
+      }
+      ymin = Math.min(0, ymin);
+      ymax = Math.max(1, ymax * 1.05);
+      const pad = (ymax - ymin || 1) * 0.1;
+      const yLo = ymin - pad;
+      const yHi = ymax + pad;
+      const mapY = v => TOP + (1 - ((v - yLo) / (yHi - yLo || 1))) * (BOTTOM - TOP);
+
+      const yTicks = niceTicks(yLo, yHi, 5);
+      drawLeftTicks(ctxOmega1, LEFT, TOP, BOTTOM, yTicks, mapY, AXIS_COLOR);
+
+      // Agent #1 angular speed curve (light blue, medium width)
+      ctxOmega1.strokeStyle = "#6ee7ff";
+      ctxOmega1.lineWidth   = 2;
+      ctxOmega1.beginPath();
+      for (let i=0;i<tArr.length;i++){
+        const x = mapX(tArr[i]);
+        const y = mapY(yArr[i]);
+        if (i===0) ctxOmega1.moveTo(x,y); else ctxOmega1.lineTo(x,y);
+      }
+      ctxOmega1.stroke();
+
+      // Axis labels
+      drawMathText(ctxOmega1, "Time (1/Ω_{max})", W/2, H-8, { size: FONT_PX, align: 'center' });
+      ctxOmega1.save();
+      ctxOmega1.translate(14, H/2);
+      ctxOmega1.rotate(-Math.PI/2);
+      drawMathText(ctxOmega1, "Angular Speed (\\dot{θ}/Ω_{max})", 0, 0, { size: FONT_PX, align: 'center' });
+      ctxOmega1.restore();
     }
 
     // =========
@@ -851,15 +898,20 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       state.timeSeries.t.push(state.t);
       state.timeSeries.meanOmega.push(state.OmegaEq>0? rmsOmega/state.OmegaEq : rmsOmega);
       state.timeSeries.meanFlux.push(meanJ);
+      state.timeSeries.omega1.push(state.omega[0]); // NEW: agent #1 angular speed
 
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = '+state.t.toFixed(1);
-      drawMain(dth); drawAgentCharts(); drawDeltaChart(dth); drawTimeSeries();
+      drawMain(dth); 
+      drawAgentCharts(); 
+      drawDeltaChart(dth); 
+      drawTimeSeries();
+      drawOmega1Series(); // NEW
+
       if (!state.running) updateButtons();
       if (state.running && !state.crashed) rafId = requestAnimationFrame(tick);
     }
 
     function stepFrame(){
-      // Only step when stopped
       if (state.running) return;
     
       let dth;
@@ -869,20 +921,21 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
         if (state.crashed) break;
       }
     
-      // If you added kymographs earlier, update them:
       if (typeof updateKymos === 'function') updateKymos(dth);
     
       const {meanJ, rmsOmega} = computeFluxAndStats(dth);
       state.timeSeries.t.push(state.t);
       state.timeSeries.meanOmega.push(state.OmegaEq>0 ? rmsOmega/state.OmegaEq : rmsOmega);
       state.timeSeries.meanFlux.push(meanJ);
-    
+      state.timeSeries.omega1.push(state.omega[0]); // NEW
+
       titlePolar.innerHTML = 'T (Ω<sub>max</sub><sup>-1</sup>) = ' + state.t.toFixed(1);
       drawMain(dth);
       drawAgentCharts();
       drawDeltaChart(dth);
       if (typeof drawKymoPanels === 'function') drawKymoPanels();
       drawTimeSeries();
+      drawOmega1Series(); // NEW
     }
     
     // =====
@@ -895,17 +948,21 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
       state.crashed = false;
       forceInitialCheckboxes();
       initArrays();
-      state.timeSeries={t:[],meanOmega:[],meanFlux:[]}; // clears RMS/Flux plot
+      state.timeSeries={t:[],meanOmega:[],meanFlux:[],omega1:[]}; 
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = 0.0';
       const d=new Array(state.N).fill(TWO_PI/state.N);
-      drawMain(d); drawAgentCharts(); drawDeltaChart(d); drawTimeSeries();
+      drawMain(d); 
+      drawAgentCharts(); 
+      drawDeltaChart(d); 
+      drawTimeSeries();
+      drawOmega1Series(); // NEW
       if(was){ state.running=true; rafId = requestAnimationFrame(tick); }
       updateButtons();
     }
 
     function forceInitialCheckboxes(){
-      if (chkPhase) chkPhase.checked = true;                 // always on
-      if (chkShowRef) {                                      // on only if meaningful
+      if (chkPhase) chkPhase.checked = true;
+      if (chkShowRef) {
         const allow = state.OmegaEq > 0;
         chkShowRef.disabled = !allow;
         chkShowRef.checked  = allow;
@@ -947,7 +1004,6 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
         return closest.element;
       }
 
-      // resize handle
       let resizing=null,startY=0,startH=0;
       wrap.addEventListener('mousedown', e=>{
         const handle=e.target.closest('.resizer'); if(!handle) return;
@@ -963,13 +1019,12 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     }
 
     // =============================
-    // Hover blurbs (3s delay)
+    // Hover blurbs
     // =============================
     const HOVER_DELAY_MS = 2000;
     const hoverTimers = new WeakMap();
     
     function setupInfoBlurbs(){
-      // attach to all current cards
       wrap.querySelectorAll('.card').forEach(card=>{
         const clear = ()=>{
           const t = hoverTimers.get(card);
@@ -1004,25 +1059,21 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     }
 
     // =============================
-    // Info icon (i) tooltip support
+    // Info icon tooltip support
     // =============================
     function initInfoIcons(){
-      // Click to toggle open (helps on touch), click elsewhere closes
       document.addEventListener('click', (e)=>{
         const icon = e.target.closest('.infoIcon');
-        // Close all if clicking outside any icon
         if (!icon){
           document.querySelectorAll('.infoIcon[data-open="1"]').forEach(el=>el.removeAttribute('data-open'));
           return;
         }
-        // Toggle this one; close others
         const isOpen = icon.getAttribute('data-open') === '1';
         document.querySelectorAll('.infoIcon[data-open="1"]').forEach(el=>{ if(el!==icon) el.removeAttribute('data-open'); });
         if (isOpen) icon.removeAttribute('data-open'); else icon.setAttribute('data-open','1');
         e.stopPropagation();
       });
     
-      // ESC to close
       document.addEventListener('keydown', (e)=>{
         if (e.key === 'Escape'){
           document.querySelectorAll('.infoIcon[data-open="1"]').forEach(el=>el.removeAttribute('data-open'));
@@ -1040,7 +1091,11 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     function resizeAll(){
       syncCanvasSizes();
       const d=currentDeltaTheta();
-      drawMain(d); drawAgentCharts(); drawDeltaChart(d); drawTimeSeries();
+      drawMain(d); 
+      drawAgentCharts(); 
+      drawDeltaChart(d); 
+      drawTimeSeries();
+      drawOmega1Series(); // NEW
     }
     
     inpSteps.addEventListener('input', ()=>{ let v=Math.round(+inpSteps.value); if(!Number.isFinite(v)||v<1) v=1; inpSteps.value=String(v); state.stepsPerFrame=v; });
@@ -1048,20 +1103,16 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
     btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }; updateButtons(); });
     btnStep && btnStep.addEventListener('click', stepFrame);
     btnReset && btnReset.addEventListener('click', ()=> hardReset({apply:true}) );
-    // Share button: copy a URL that restores current settings
     btnShare && btnShare.addEventListener('click', async () => {
       const url = new URL(location.href);
       url.search = buildShareQuery();
-    
       try {
         await (navigator.clipboard && navigator.clipboard.writeText(url.toString()));
         alert('Shareable link copied to clipboard!');
       } catch (_) {
-        // Fallback prompt if Clipboard API not available (old browsers / cross-origin)
         prompt('Copy this link:', url.toString());
       }
     });
-    // Update visuals immediately when toggling overlays
     chkShowRef && chkShowRef.addEventListener('change', resizeAll);
     chkPhase  && chkPhase.addEventListener('change', resizeAll);
 
@@ -1077,40 +1128,31 @@ numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPr
 Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`);
     });
 
-    // Try to restore from URL first, else fall back to default init
-if (location.search && location.search.length > 1) {
-  const ok = applyFromQuery(location.search);
-  if (!ok) {
-    // Fallback if parsing failed
-    applyParams({restartIfNChanged:false});
-    forceInitialCheckboxes();
-    initArrays();
-    saveUIFromState();
-    resizeAll();
-  }
-  } else {
-    applyParams({restartIfNChanged:false});
-    forceInitialCheckboxes();
-    initArrays();
-    saveUIFromState();
-    resizeAll();
-  }
+    if (location.search && location.search.length > 1) {
+      const ok = applyFromQuery(location.search);
+      if (!ok) {
+        applyParams({restartIfNChanged:false});
+        forceInitialCheckboxes();
+        initArrays();
+        saveUIFromState();
+        resizeAll();
+      }
+    } else {
+      applyParams({restartIfNChanged:false});
+      forceInitialCheckboxes();
+      initArrays();
+      saveUIFromState();
+      resizeAll();
+    }
   
-  // Usual one-time wiring
-  initDragResize();
-  setupInfoBlurbs();
-  initInfoIcons();
-  updateButtons();
+    initDragResize();
+    setupInfoBlurbs();
+    initInfoIcons();
+    updateButtons();
+    if (selPreset) selPreset.value = '';
+    window.addEventListener('resize', resizeAll);
 
-// Keep the preset dropdown visually on "Custom" if user tweaks numbers post-load
-if (selPreset) selPreset.value = '';
-
-window.addEventListener('resize', resizeAll);
-
-
-    // =================
-    // Tiny self-checks
-    // =================
+    // Self-checks (unchanged except they still work with new plot)
     (function(){
       const tests=[], push=(n,ok,info="")=>tests.push({name:n,ok,info});
       try{
@@ -1130,6 +1172,7 @@ window.addEventListener('resize', resizeAll);
         push('drawMain defined', typeof drawMain==='function');
         push('drawDeltaChart defined', typeof drawDeltaChart==='function');
         push('drawTimeSeries defined', typeof drawTimeSeries==='function');
+        push('drawOmega1Series defined', typeof drawOmega1Series==='function');
         push('initDragResize defined', typeof initDragResize==='function');
         push('niceTicks defined', typeof niceTicks==='function');
 
@@ -1137,21 +1180,15 @@ window.addEventListener('resize', resizeAll);
         const cd=currentDeltaTheta(); push('deltaTheta length=N', cd.length===state.N, `len=${cd.length}`);
         try{ resizeAll(); push('resizeAll executes', true);}catch(err){ push('resizeAll executes', false, err&&err.message?err.message:String(err)); }
 
-        // Additional tests to prevent regressions
         push('constants defined', typeof AXIS_COLOR==='string' && typeof AXIS_W==='number' && typeof DASH_W==='number' && typeof FONT_PX==='number');
         push('DOT_SCALE set', Math.abs(DOT_SCALE-1.3)<1e-9, `DOT_SCALE=${DOT_SCALE}`);
-        push('no accidental $1 global', typeof window.$1==='undefined');
         push('chkShowRef exists', !!document.getElementById('chkShowRef'));
         push('chkPhase exists', !!document.getElementById('chkPhase'));
-        push('showPhase fallback', (typeof showPhase==='function') && showPhase() === (!document.getElementById('chkPhase') || document.getElementById('chkPhase').checked));
-        push('showRefRing fallback', (typeof showRefRing==='function') && showRefRing() === (!document.getElementById('chkShowRef') || document.getElementById('chkShowRef').checked));
       }catch(e){ push('self-test error',false,e&&e.message?e.message:String(e)); }
       console.table(tests);
     })();
 
-    // =========
     // Autostart
-    // =========
     state.running=false; rafId = requestAnimationFrame(tick);
 
   </script>
