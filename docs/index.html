@@ -169,31 +169,31 @@ window.MathJax = {
   svg: { fontCache: 'global' }
 };
   </script>
-  <script src="./Simple Traffic Model Simulator_files/tex-svg.js.download" async=""></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 </head>
 <body>
   <div class="shell">
     <header>
       <div>
         <h1>Agent-Based Traffic Simulator</h1>
-        <div class="sub">Simulation of multiple agents interacting via the dynamical equations discussed <a href="https://tristansu.github.io/traffic_sim_web/XXX">here</a>, and shown below for reference.</div>
+        <div class="sub">Simulation of multiple agents interacting via the dynamical equations discussed <a href=XXX>here</a>, and shown below for reference.</div>
         <div class="sub">Use the presets to select parameter sets that demonstrate distinct qualitative behaviour, or explore the parameter space on your own. </div>
         <div class="sub">Tristan Ursell, PhD © 2025 </div>
       </div>
     </header>
     <section class="eqpane">
-      <div class="eq mathjax">
-        \begin{equation}
-        \ddot{\theta}_i(t) =
-        \begin{cases}
-        -\alpha \dot{\theta}_i(t), & \Delta_i(t) < \frac{d_0}{R} \\
-        \alpha \left( 1 - e^{-(R\Delta_i(t) - d_0)} - \dot{\theta}_i(t) \right), & \Delta_i(t) \ge \frac{d_0}{R}
-        \end{cases}
-          \,\,\,\,\,\,\mbox{with}\,\,\,\,\,\,\Delta_i = \theta_{i+1} - \theta_i
-        \end{equation}
-        <mjx-container class="MathJax" jax="SVG" display="true"></mjx-container>
-      </div>
-    </section>
+    <div class="eq mathjax">
+      \begin{equation}
+      \ddot{\theta}_i(t) =
+      \begin{cases}
+      -\alpha \dot{\theta}_i(t), & \Delta_i(t) < \frac{d_0}{R} \\
+      \alpha \left( 1 - e^{-(R\Delta_i(t) - d_0)} - \dot{\theta}_i(t) \right), & \Delta_i(t) \ge \frac{d_0}{R}
+      \end{cases}
+        \,\,\,\,\,\,\mbox{with}\,\,\,\,\,\,\Delta_i = \theta_{i+1} - \theta_i
+      \end{equation}
+  </div>
+</section>
     
     <section class="top">
       <div class="controls">
