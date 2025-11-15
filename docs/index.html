@@ -183,8 +183,14 @@ window.MathJax = {
     </header>
     <section class="eqpane">
       <div class="eq mathjax">
-        <!-- (MathJax SVG content elided for brevity; unchanged from your original file) -->
-        <!-- Keeping the full MathJax block as-is in your own file is fine -->
+        \begin{equation}
+        \ddot{\theta}_i(t) =
+        \begin{cases}
+        -\alpha \dot{\theta}_i(t), & \Delta_i(t) < \frac{d_0}{R} \\
+        \alpha \left( 1 - e^{-(R\Delta_i(t) - d_0)} - \dot{\theta}_i(t) \right), & \Delta_i(t) \ge \frac{d_0}{R}
+        \end{cases}
+          \,\,\,\,\,\,\mbox{with}\,\,\,\,\,\,\Delta_i = \theta_{i+1} - \theta_i
+        \end{equation}
         <mjx-container class="MathJax" jax="SVG" display="true"></mjx-container>
       </div>
     </section>
