@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)https://tristansu.github.io/traffic_sim_web/ -->
 <html lang="en">
 <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   
@@ -234,6 +233,8 @@ window.MathJax = {
               <div><label for="inpEps">ε (angle perturbation) <span class="infoIcon" aria-label="info" data-tip="Initial sinusoidal amplitude (radians) of θᵢ; seeds pattern formation. Larger ε = stronger initial disturbance. The maximum ε is set by mean separation and perturbation frequency.">i</span></label><input id="inpEps" type="number" value="0.5" step="0.01"></div>
               <div><label for="inpNfreq">n (perturb freq)  <span class="infoIcon" aria-label="info" data-tip="Spatial frequency of the initial perturbation (cycles per 2π); can be fractional.">i</span></label><input id="inpNfreq" type="number" value="0.5" step="0.01"></div>
               <div><label for="inpSteps">Steps / frame  <span class="infoIcon" aria-label="info" data-tip="How many Δt updates to run per animation frame. Higher = faster simulation time, heavier on CPU.">i</span></label><input id="inpSteps" type="number" value="500" step="1"></div>
+              <!-- NEW: Time Window parameter -->
+              <div><label for="inpTimeWindow">Time Window <span class="infoIcon" aria-label="info" data-tip="Width of the time window (in 1/Ω_max units) shown in the ω₁(t) plot.">i</span></label><input id="inpTimeWindow" type="number" value="100" step="1" min="1"></div>
             </div>
           </div>
           <!-- Actions (moved inside parameter group) -->
@@ -271,7 +272,8 @@ window.MathJax = {
           <canvas id="canvasOmega" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="omega1" draggable="true" data-blurb="Angular speed ω₁/Ωₘₐₓ of Agent #1 vs time.">
+        <!-- Agent #1 angular speed vs time (moving window) -->
+        <div class="card draggable resizable" data-id="omega1" draggable="true" data-blurb="Angular speed ω₁/Ωₘₐₓ of Agent #1 vs time, shown over the most recent Time Window.">
           <canvas id="canvasOmega1" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
@@ -292,23 +294,28 @@ window.MathJax = {
     // Constants, DOM, light utilities
     // ================================
     const TWO_PI = Math.PI*2;
-    const AXIS_COLOR = "#cfd3dc", AXIS_W = 3, DASH_W = 2, FONT_PX = 16; // restored constants
-    const DOT_SCALE = 1.3; // 30% larger agent color dots
-    const EPS_CRASH = 1e-6; // treat Δθ_i <= this as a collision (rad)
-    // TIME STEP (Δt)
+    const AXIS_COLOR = "#cfd3dc", AXIS_W = 3, DASH_W = 2, FONT_PX = 16;
+    const DOT_SCALE = 1.3;
+    const EPS_CRASH = 1e-6;
     const DT = 0.0001;
     
     const main = document.getElementById('canvasMain'), ctxMain = main.getContext('2d');
     const cnvOmega = document.getElementById('canvasOmega'), ctxOmega = cnvOmega.getContext('2d');
-    const cnvOmega1 = document.getElementById('canvasOmega1'), ctxOmega1 = cnvOmega1.getContext('2d'); // NEW
+    const cnvOmega1 = document.getElementById('canvasOmega1'), ctxOmega1 = cnvOmega1.getContext('2d');
     const cnvDelta = document.getElementById('canvasDelta'), ctxDelta = cnvDelta.getContext('2d');
     const cnvTime  = document.getElementById('canvasTime'),  ctxTime  = cnvTime.getContext('2d');
     const wrap = document.getElementById('canvasWrap');
     const titlePolar = document.getElementById('titlePolar');
 
-    const inpN = document.getElementById('inpN'), inpR = document.getElementById('inpR'), inpd0 = document.getElementById('inpd0');
-    const inpEps = document.getElementById('inpEps'), inpNfreq = document.getElementById('inpNfreq');
-    const inpSteps = document.getElementById('inpSteps'), inpAlphaRatio = document.getElementById('inpAlphaRatio');
+    const inpN = document.getElementById('inpN'),
+          inpR = document.getElementById('inpR'),
+          inpd0 = document.getElementById('inpd0');
+    const inpEps = document.getElementById('inpEps'),
+          inpNfreq = document.getElementById('inpNfreq');
+    const inpSteps = document.getElementById('inpSteps'),
+          inpAlphaRatio = document.getElementById('inpAlphaRatio');
+    const inpTimeWindow = document.getElementById('inpTimeWindow'); // NEW
+
     const btnStart = document.getElementById('btnStart'),
       btnStop  = document.getElementById('btnStop'),
       btnStep  = document.getElementById('btnStep'),
@@ -330,6 +337,7 @@ window.MathJax = {
       q.set('nf', inpNfreq.value);
       q.set('spf', inpSteps.value);
       q.set('ar', inpAlphaRatio.value);
+      if (inpTimeWindow) q.set('tw', inpTimeWindow.value); // include time window
       if (chkShowRef) q.set('ref', chkShowRef.checked ? '1' : '0');
       if (chkPhase)   q.set('phase', chkPhase.checked ? '1' : '0');
       if (selPreset && selPreset.value) q.set('preset', selPreset.value);
@@ -352,6 +360,7 @@ window.MathJax = {
       if (p.has('nf'))  inpNfreq.value    = p.get('nf');
       if (p.has('spf')) inpSteps.value    = p.get('spf');
       if (p.has('ar'))  inpAlphaRatio.value = p.get('ar');
+      if (p.has('tw') && inpTimeWindow) inpTimeWindow.value = p.get('tw'); // NEW
       if (p.has('ref') && chkShowRef) chkShowRef.checked = p.get('ref') === '1';
       if (p.has('phase') && chkPhase) chkPhase.checked   = p.get('phase') === '1';
       if (selPreset) selPreset.value = p.get('preset') || '';
@@ -392,6 +401,7 @@ window.MathJax = {
       inpNfreq.value = p.nfreq;
       inpSteps.value = p.stepsPerFrame;
       inpAlphaRatio.value = p.alphaRatio;
+      // Time window left as user-controlled; not overridden by presets
     }
 
     function applySelectedPreset(key) {
@@ -406,7 +416,7 @@ window.MathJax = {
       if (key) applySelectedPreset(key);
     });
 
-    const numericInputs = [inpN, inpR, inpd0, inpEps, inpNfreq, inpSteps, inpAlphaRatio];
+    const numericInputs = [inpN, inpR, inpd0, inpEps, inpNfreq, inpSteps, inpAlphaRatio, inpTimeWindow];
     numericInputs.forEach(el => el && el.addEventListener('input', () => { if (selPreset) selPreset.value = ''; }));
 
     function syncRefCheckbox(){
@@ -534,7 +544,8 @@ window.MathJax = {
       N:50,R:5,d0:0.5,epsilon:0.5,nfreq:0.5,dt:DT, stepsPerFrame:500, alphaRatio:0.5,
       alpha:0, alphaC:0, OmegaEq:0, t:0, theta:[], omega:[], colors:[], thetaVG:0,
       timeSeries:{t:[],meanOmega:[],meanFlux:[],omega1:[]},
-      yMaxDelta:0, running:false, crashed:false
+      yMaxDelta:0, running:false, crashed:false,
+      timeWindow:100  // NEW: default time window
     };
 
     // ==========================
@@ -568,6 +579,8 @@ window.MathJax = {
       state.dt = DT;
       let spf=Math.round(+inpSteps.value); state.stepsPerFrame = (Number.isFinite(spf)&&spf>0)?spf:1;
       state.alphaRatio=parseFloat(inpAlphaRatio.value||"0.5");
+      const twRaw = parseFloat(inpTimeWindow.value || "100");
+      state.timeWindow = (Number.isFinite(twRaw) && twRaw > 0) ? twRaw : 100;  // NEW
       state.alphaC=computeAlphaC(state.N,state.R,state.d0);
       state.alpha=state.alphaRatio*state.alphaC;
       updateOmegaEq();
@@ -577,6 +590,7 @@ window.MathJax = {
     function saveUIFromState(){
       inpN.value=state.N; inpR.value=state.R; inpd0.value=state.d0; inpEps.value=state.epsilon;
       inpNfreq.value=state.nfreq; inpSteps.value=state.stepsPerFrame; inpAlphaRatio.value=state.alphaRatio;
+      if (inpTimeWindow) inpTimeWindow.value = state.timeWindow;
     }
 
     // =================
@@ -826,6 +840,7 @@ window.MathJax = {
       ctxTime.restore();
     }
 
+    // NEW: angular speed of Agent #1 vs time with moving window
     function drawOmega1Series(){
       const tArr = state.timeSeries.t;
       const yArr = state.timeSeries.omega1;
@@ -833,6 +848,20 @@ window.MathJax = {
       if (tArr.length < 2 || yArr.length < 2) return;
 
       const LEFT = 72, RIGHT = W - 16, TOP = 10, BOTTOM = H - 30;
+
+      const tmax = tArr[tArr.length - 1];
+      const windowWidth = state.timeWindow || 100;
+      const rawTmin = tArr[0];
+      const tmin = Math.max(rawTmin, tmax - windowWidth);
+
+      // Filter indices in the active window
+      const idx = [];
+      for (let i = 0; i < tArr.length; i++) {
+        if (tArr[i] >= tmin - 1e-12) idx.push(i);
+      }
+      if (idx.length < 2) return;
+
+      const mapX = v => LEFT + ((v - tmin) / (tmax - tmin || 1)) * (RIGHT - LEFT);
 
       // Axes
       ctxOmega1.strokeStyle = AXIS_COLOR;
@@ -844,15 +873,17 @@ window.MathJax = {
       ctxOmega1.lineTo(LEFT, BOTTOM);
       ctxOmega1.stroke();
 
-      const tmin = tArr[0];
-      const tmax = tArr[tArr.length - 1] || tmin + 1e-6;
-      const mapX = v => LEFT + ((v - tmin) / (tmax - tmin || 1)) * (RIGHT - LEFT);
-
       const xTicks = niceTicks(tmin, tmax, 6);
       drawBottomTicks(ctxOmega1, LEFT, RIGHT, BOTTOM, xTicks, mapX, AXIS_COLOR);
 
-      let ymin = Math.min(...yArr);
-      let ymax = Math.max(...yArr);
+      // Y range based on window
+      let ymin = Infinity, ymax = -Infinity;
+      for (const k of idx) {
+        const v = yArr[k];
+        if (!Number.isFinite(v)) continue;
+        if (v < ymin) ymin = v;
+        if (v > ymax) ymax = v;
+      }
       if (!isFinite(ymin) || !isFinite(ymax)) {
         ymin = 0; ymax = 1;
       }
@@ -866,13 +897,16 @@ window.MathJax = {
       const yTicks = niceTicks(yLo, yHi, 5);
       drawLeftTicks(ctxOmega1, LEFT, TOP, BOTTOM, yTicks, mapY, AXIS_COLOR);
 
+      // Agent #1 angular speed curve (light blue, medium width)
       ctxOmega1.strokeStyle = "#6ee7ff";
       ctxOmega1.lineWidth   = 2;
       ctxOmega1.beginPath();
-      for (let i=0;i<tArr.length;i++){
-        const x = mapX(tArr[i]);
-        const y = mapY(yArr[i]);
-        if (i===0) ctxOmega1.moveTo(x,y); else ctxOmega1.lineTo(x,y);
+      let first = true;
+      for (const k of idx){
+        const x = mapX(tArr[k]);
+        const y = mapY(yArr[k]);
+        if (first) { ctxOmega1.moveTo(x,y); first=false; }
+        else ctxOmega1.lineTo(x,y);
       }
       ctxOmega1.stroke();
 
@@ -881,7 +915,7 @@ window.MathJax = {
       ctxOmega1.save();
       ctxOmega1.translate(14, H/2);
       ctxOmega1.rotate(-Math.PI/2);
-      drawMathText(ctxOmega1, "Angular Speed (ω₁/Ω_{max})", 0, 0, { size: FONT_PX, align: 'center' });
+      drawMathText(ctxOmega1, "Angular Speed (\\dot{θ}/Ω_{max})", 0, 0, { size: FONT_PX, align: 'center' });
       ctxOmega1.restore();
     }
 
@@ -901,14 +935,14 @@ window.MathJax = {
       state.timeSeries.t.push(state.t);
       state.timeSeries.meanOmega.push(state.OmegaEq>0? rmsOmega/state.OmegaEq : rmsOmega);
       state.timeSeries.meanFlux.push(meanJ);
-      state.timeSeries.omega1.push(state.omega[0]); // NEW: agent #1 angular speed
+      state.timeSeries.omega1.push(state.omega[0]); // agent #1 angular speed
 
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = '+state.t.toFixed(1);
       drawMain(dth); 
       drawAgentCharts(); 
       drawDeltaChart(dth); 
       drawTimeSeries();
-      drawOmega1Series(); // NEW
+      drawOmega1Series();
 
       if (!state.running) updateButtons();
       if (state.running && !state.crashed) rafId = requestAnimationFrame(tick);
@@ -930,7 +964,7 @@ window.MathJax = {
       state.timeSeries.t.push(state.t);
       state.timeSeries.meanOmega.push(state.OmegaEq>0 ? rmsOmega/state.OmegaEq : rmsOmega);
       state.timeSeries.meanFlux.push(meanJ);
-      state.timeSeries.omega1.push(state.omega[0]); // NEW
+      state.timeSeries.omega1.push(state.omega[0]); // agent #1 angular speed
 
       titlePolar.innerHTML = 'T (Ω<sub>max</sub><sup>-1</sup>) = ' + state.t.toFixed(1);
       drawMain(dth);
@@ -938,7 +972,7 @@ window.MathJax = {
       drawDeltaChart(dth);
       if (typeof drawKymoPanels === 'function') drawKymoPanels();
       drawTimeSeries();
-      drawOmega1Series(); // NEW
+      drawOmega1Series();
     }
     
     // =====
@@ -958,7 +992,7 @@ window.MathJax = {
       drawAgentCharts(); 
       drawDeltaChart(d); 
       drawTimeSeries();
-      drawOmega1Series(); // NEW
+      drawOmega1Series();
       if(was){ state.running=true; rafId = requestAnimationFrame(tick); }
       updateButtons();
     }
@@ -1098,10 +1132,18 @@ window.MathJax = {
       drawAgentCharts(); 
       drawDeltaChart(d); 
       drawTimeSeries();
-      drawOmega1Series(); // NEW
+      drawOmega1Series();
     }
     
     inpSteps.addEventListener('input', ()=>{ let v=Math.round(+inpSteps.value); if(!Number.isFinite(v)||v<1) v=1; inpSteps.value=String(v); state.stepsPerFrame=v; });
+    if (inpTimeWindow) {
+      inpTimeWindow.addEventListener('input', () => {
+        const val = parseFloat(inpTimeWindow.value || "100");
+        state.timeWindow = (Number.isFinite(val) && val > 0) ? val : 100;
+        drawOmega1Series();
+      });
+    }
+
     btnStart && btnStart.addEventListener('click', ()=>{ if(!state.running){ state.running=true; updateButtons(); rafId = requestAnimationFrame(tick); } });
     btnStop  && btnStop.addEventListener('click', ()=>{ state.running=false; if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }; updateButtons(); });
     btnStep && btnStep.addEventListener('click', stepFrame);
@@ -1187,6 +1229,7 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
         push('DOT_SCALE set', Math.abs(DOT_SCALE-1.3)<1e-9, `DOT_SCALE=${DOT_SCALE}`);
         push('chkShowRef exists', !!document.getElementById('chkShowRef'));
         push('chkPhase exists', !!document.getElementById('chkPhase'));
+        push('timeWindow default', state.timeWindow === 100, `timeWindow=${state.timeWindow}`);
       }catch(e){ push('self-test error',false,e&&e.message?e.message:String(e)); }
       console.table(tests);
     })();
