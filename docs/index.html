@@ -186,8 +186,8 @@ window.MathJax = {
       \begin{equation}
       \ddot{\theta}_i(t) =
       \begin{cases}
-      -\alpha \dot{\theta}_i(t), & \Delta_i(t) < \frac{d_0}{R} \\
-      \alpha \left( 1 - e^{-(R\Delta_i(t) - d_0)} - \dot{\theta}_i(t) \right), & \Delta_i(t) \ge \frac{d_0}{R}
+      -\alpha \dot{\theta}_i(t), & \Delta_i(t) < \frac{d}{R} \\
+      \alpha \left( 1 - e^{-(R\Delta_i(t) - d)} - \dot{\theta}_i(t) \right), & \Delta_i(t) \ge \frac{d}{R}
       \end{cases}
         \,\,\,\,\,\,\mbox{with}\,\,\,\,\,\,\Delta_i = \theta_{i+1} - \theta_i
       \end{equation}
@@ -227,7 +227,7 @@ window.MathJax = {
               <div><label>α/α<sub>c</sub>     <span class="infoIcon" aria-label="info" data-tip="Sets α as a fraction of the critical α_c for linear stability. Values &gt; 1 tend toward the steady-state, values &lt; 1 propagate disturbances in density, and frequently phase separate.">i</span></label><input id="inpAlphaRatio" type="number" value="0.5" step="0.01" min="0"></div>
               <div><label for="inpN">N (cars)    <span class="infoIcon" aria-label="info" data-tip="Number of agents on the ring. Higher N reduces uniform spacing Δ* = 2π/N.">i</span></label><input id="inpN" type="number" value="50" min="3" max="500" step="1"></div>
               <div><label for="inpR">R (ring radius)   <span class="infoIcon" aria-label="info" data-tip="Ring radius. For the same angular gap Δᵢ, the physical gap is R·Δᵢ. Larger R increases spacing RΔᵢ for fixed N.">i</span></label><input id="inpR" type="number" value="5" step="0.1"></div>
-              <div><label for="inpd0">d₀ (stop distance)  <span class="infoIcon" aria-label="info" data-tip="Minimum gap where agents brake: if R·Δᵢ ≤ d₀, speed exponentially decreases with rate α toward zero (stop regime).">i</span></label><input id="inpd0" type="number" value="0.5" step="0.01"></div>
+              <div><label for="inpd0">d (stop distance)  <span class="infoIcon" aria-label="info" data-tip="Minimum gap where agents brake: if R·Δᵢ ≤ d₀, speed exponentially decreases with rate α toward zero (stop regime).">i</span></label><input id="inpd0" type="number" value="0.5" step="0.01"></div>
             </div>
             <div style="display:grid;gap:8px;">
               <div><label for="inpEps">ε (angle perturbation) <span class="infoIcon" aria-label="info" data-tip="Initial sinusoidal amplitude (radians) of θᵢ; seeds pattern formation. Larger ε = stronger initial disturbance. The maximum ε is set by mean separation and perturbation frequency.">i</span></label><input id="inpEps" type="number" value="0.5" step="0.01"></div>
