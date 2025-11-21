@@ -251,7 +251,7 @@ window.MathJax = {
             
             <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content;">
               <label style="display: inline-flex; align-items: center; gap: 8px; opacity: 1; cursor: pointer;" title="">
-                <input type="checkbox" id="chkShowRef" checked> show θᵢ(t) − Ωₑᵩt ring
+                <input type="checkbox" id="chkShowRef" checked> show θᵢ(t) − Ω<sub>ss</sub>t ring
               </label>
               <label style="display:inline-flex;align-items:center;gap:8px;">
                 <input type="checkbox" id="chkPhase" checked> show two-phase classification
@@ -264,12 +264,12 @@ window.MathJax = {
 
     <section class="left">
       <div class="canvasWrap" id="canvasWrap">
-        <div class="card draggable resizable" data-id="polar" draggable="true" data-blurb="Left ring shows θᵢ(t) for all agents, each represented by a colored dot. As the system phase separates into high and low density, the green dot tracks the high-density phase (mean angle), the red and green circular pieces track the location of each phase, and the gray dot is the theoretical prediction for jamiton velocity. Right ring shows θᵢ(t) − Ω_eq·t when enabled, this shows motion relative to the steady-state.">
+        <div class="card draggable resizable" data-id="polar" draggable="true" data-blurb="Left ring shows θᵢ(t) for all agents, each represented by a colored dot. As the system phase separates into high and low density, the green dot tracks the high-density phase (mean angle), the red and green circular pieces track the location of each phase, and the gray dot is the theoretical prediction for jamiton velocity. Right ring shows θᵢ(t) − Ω_ss·t when enabled, this shows motion relative to the steady-state.">
           <div class="cardTitle"><span id="titlePolar">T (Ω<sub>max</sub><sup>-1</sup>) = 0.0</span></div>
           <canvas id="canvasMain" width="642" height="308" style="height: 308px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="omega" draggable="true" data-blurb="Per-agent angular speed ωᵢ/Ωₘₐₓ vs agent index. Gray line=1, dashed = Ω_eq, blue dashed = steady-state ω from max Δᵢ.">
+        <div class="card draggable resizable" data-id="omega" draggable="true" data-blurb="Per-agent angular speed ωᵢ/Ωₘₐₓ vs agent index. Gray line=1, dashed = Ω_ss, blue dashed = steady-state ω from max Δᵢ.">
           <canvas id="canvasOmega" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
@@ -430,7 +430,7 @@ window.MathJax = {
       if (lbl) {
         lbl.style.opacity = allow ? 1 : 0.5;
         lbl.style.cursor  = allow ? 'pointer' : 'not-allowed';
-        lbl.title = allow ? '' : 'Disabled when Ω_eq ≤ 0';
+        lbl.title = allow ? '' : 'Disabled when Ω_ss ≤ 0';
       }
     }
 
@@ -686,7 +686,7 @@ window.MathJax = {
 
       drawMathText(ctxMain,"θ_{i}(t)",cxL-8,cy-8,{size:FONT_PX,align:'left'});
       if(state.OmegaEq>0 && showRefRing() && pxOff>baseR*.2)
-        drawMathText(ctxMain,"θ_{i}(t) − Ω_{eq} t",cxR-30,cy-8,{size:FONT_PX,align:'left'});
+        drawMathText(ctxMain,"θ_{i}(t) − Ω_{ss} t",cxR-30,cy-8,{size:FONT_PX,align:'left'});
     }
 
     function drawAgentCharts(){
@@ -699,7 +699,7 @@ window.MathJax = {
       ctxOmega.moveTo(LEFT,TOP);    ctxOmega.lineTo(LEFT,BOTTOM);
       ctxOmega.stroke();
 
-      drawMathText(ctxOmega,`Ω_{eq} = ${state.OmegaEq.toFixed(4)}` ,W/2,TITLE_Y,{size:FONT_PX,align:'center'});
+      drawMathText(ctxOmega,`Ω_{ss} = ${state.OmegaEq.toFixed(4)}` ,W/2,TITLE_Y,{size:FONT_PX,align:'center'});
       ctxOmega.strokeStyle="#8a93a8"; ctxOmega.setLineDash([5,6]); ctxOmega.lineWidth=DASH_W;
       const yOeq=TOP+(1-(state.OmegaEq/1.05))*(BOTTOM-TOP);
       ctxOmega.beginPath(); ctxOmega.moveTo(LEFT,yOeq); ctxOmega.lineTo(RIGHT,yOeq); ctxOmega.stroke(); ctxOmega.setLineDash([]);
@@ -832,7 +832,7 @@ window.MathJax = {
       ctxTime.strokeStyle="#f5a14b"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<R.length;i++){ const x=mapX(tArr[i]), y=mapY2(R[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
       if(Number.isFinite(Jss)){ ctxTime.setLineDash([6,6]); ctxTime.lineWidth=DASH_W; ctxTime.strokeStyle="#f5a14b"; const yRef=mapY2(Jss); ctxTime.beginPath(); ctxTime.moveTo(LEFT,yRef); ctxTime.lineTo(RIGHT,yRef); ctxTime.stroke(); ctxTime.setLineDash([]); }
       drawMathText(ctxTime,"t (Ω_{max}^{-1})",W/2,H-8,{size:FONT_PX,align:'center'});
-      ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{eq})/Ω_{eq}":"RMS(ω−Ω_{eq})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
+      ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{ss})/Ω_{ss}":"RMS(ω−Ω_{ss})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
       const rightTickStrings = niceTicks(rmin-rpad,rmax+rpad,5).map(v=>String(+v.toFixed(2)).replace(/\.00$/,""));
       ctxTime.font = `${12}px system-ui, -apple-system, Segoe UI, Roboto`;
       let maxRightW = 0; for(const s of rightTickStrings){ const w = ctxTime.measureText(s).width; if(w>maxRightW) maxRightW = w; }
@@ -1208,7 +1208,7 @@ Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`
         push("OmegaEq zero in jammed limit", state.OmegaEq===0, `OmegaEq=${state.OmegaEq}`);
         state.N=pN; state.R=pR; state.d0=pd0; updateOmegaEq();
 
-        const r1=parseMathRuns('Ω_{eq}'); push('parse subscript group', r1.length>=2 && r1[1].kind==='sub' && r1[1].text==='eq');
+        const r1=parseMathRuns('Ω_{ss}'); push('parse subscript group', r1.length>=2 && r1[1].kind==='sub' && r1[1].text==='ss');
         const r2=parseMathRuns('ω_i');    push('parse single-char subscript', r2.length===2 && r2[1].kind==='sub' && r2[1].text==='i');
         const r3=parseMathRuns('Ω_{max}^{-1}'); push('parse sub & sup', r3.some(r=>r.kind==='sub') && r3.some(r=>r.kind==='sup'));
 
