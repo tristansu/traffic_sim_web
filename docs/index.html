@@ -648,6 +648,35 @@ window.MathJax = {
     // ============
     function drawMain(dth){
       const {W,H}=prepCanvas(main,ctxMain);
+
+      // === Compute time-window-averaged flux ===
+      const T  = state.timeSeries.t;
+      const J  = state.timeSeries.meanFlux;
+      const TW = state.timeWindow;
+      const tNow = state.t;
+      
+      let sumJ = 0, count = 0;
+      for (let i = J.length - 1; i >= 0; i--) {
+        if (T[i] >= tNow - TW) {
+          sumJ += J[i];
+          count++;
+        } else break;
+      }
+      const Javg = count > 0 ? (sumJ / count) : 0;
+      
+      // === Draw title ===
+      ctxTime.save();
+      ctxTime.fillStyle = "#cfd3dc";
+      ctxTime.font = "16px system-ui";
+      ctxTime.textAlign = "center";
+      ctxTime.fillText(
+        `⟨Flux⟩ over last ${TW.toFixed(1)} = ${Javg.toFixed(3)}`,
+        W / 2,
+        22
+      );
+      ctxTime.restore();
+
+      
       const baseR=Math.min(W*.38,H*.42); let pxOff=2.5*baseR;
       const maxOff=Math.max(0,W-baseR*2.2); if(pxOff>maxOff) pxOff=maxOff;
       const cxL=Math.min(W*.30,W/2 - pxOff/2), cy=H/2, cxR=cxL+pxOff;
