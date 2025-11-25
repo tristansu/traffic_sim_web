@@ -860,7 +860,7 @@ window.MathJax = {
       ctxTime.strokeStyle="#6bb7ff"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<L.length;i++){ const x=mapX(tArr[i]), y=mapY1(L[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
       ctxTime.strokeStyle="#f5a14b"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<R.length;i++){ const x=mapX(tArr[i]), y=mapY2(R[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
       if(Number.isFinite(Jss)){ ctxTime.setLineDash([6,6]); ctxTime.lineWidth=DASH_W; ctxTime.strokeStyle="#f5a14b"; const yRef=mapY2(Jss); ctxTime.beginPath(); ctxTime.moveTo(LEFT,yRef); ctxTime.lineTo(RIGHT,yRef); ctxTime.stroke(); ctxTime.setLineDash([]); }
-      drawMathText(ctxTime,"t (Ω_{max}^{-1})",W/2,H-8,{size:FONT_PX,align:'center'});
+      drawMathText(ctxTime,"Time (1/Ω_{max})",W/2,H-8,{size:FONT_PX,align:'center'});
       ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{ss})/Ω_{ss}":"RMS(ω−Ω_{ss})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
       const rightTickStrings = niceTicks(rmin-rpad,rmax+rpad,5).map(v=>String(+v.toFixed(2)).replace(/\.00$/,""));
       ctxTime.font = `${12}px system-ui, -apple-system, Segoe UI, Roboto`;
@@ -1191,18 +1191,6 @@ window.MathJax = {
     });
     chkShowRef && chkShowRef.addEventListener('change', resizeAll);
     chkPhase  && chkPhase.addEventListener('change', resizeAll);
-
-    document.getElementById('howHost')?.addEventListener('click', e=>{
-      e.preventDefault();
-      alert(`Quick hosting (free):
-
-1) Create a new public GitHub repo (e.g., traffic-model-web).
-2) Add this single file as index.html and commit.
-3) In repo Settings → Pages, pick “Deploy from a branch”, branch: main, folder: / (root).
-4) Your app will be live at: https://<your-user>.github.io/traffic-model-web/
-
-Netlify/Vercel: drag-and-drop this file into a new site. No build steps needed.`);
-    });
 
     if (location.search && location.search.length > 1) {
       const ok = applyFromQuery(location.search);
