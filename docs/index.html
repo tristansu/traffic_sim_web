@@ -648,35 +648,7 @@ window.MathJax = {
     // ============
     function drawMain(dth){
       const {W,H}=prepCanvas(main,ctxMain);
-
-      // === Compute time-window-averaged flux ===
-      const T  = state.timeSeries.t;
-      const J  = state.timeSeries.meanFlux;
-      const TW = state.timeWindow;
-      const tNow = state.t;
-      
-      let sumJ = 0, count = 0;
-      for (let i = J.length - 1; i >= 0; i--) {
-        if (T[i] >= tNow - TW) {
-          sumJ += J[i];
-          count++;
-        } else break;
-      }
-      const Javg = count > 0 ? (sumJ / count) : 0;
-      
-      // === Draw title ===
-      ctxTime.save();
-      ctxTime.fillStyle = "#cfd3dc";
-      ctxTime.font = "16px system-ui";
-      ctxTime.textAlign = "center";
-      ctxTime.fillText(
-        `⟨Flux⟩ over last ${TW.toFixed(1)} = ${Javg.toFixed(3)}`,
-        W / 2,
-        22
-      );
-      ctxTime.restore();
-
-      
+     
       const baseR=Math.min(W*.38,H*.42); let pxOff=2.5*baseR;
       const maxOff=Math.max(0,W-baseR*2.2); if(pxOff>maxOff) pxOff=maxOff;
       const cxL=Math.min(W*.30,W/2 - pxOff/2), cy=H/2, cxR=cxL+pxOff;
@@ -848,7 +820,36 @@ window.MathJax = {
 
     function drawTimeSeries(){
       cnvTime.style.display='block'; const tArr=state.timeSeries.t; if(tArr.length<2) { const _=prepCanvas(cnvTime,ctxTime); return; }
-      const {W,H}=prepCanvas(cnvTime,ctxTime); const LEFT=72, RIGHT=W-72, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
+      const {W,H}=prepCanvas(cnvTime,ctxTime); 
+      
+      // === Compute time-window-averaged flux ===
+      const T  = state.timeSeries.t;
+      const J  = state.timeSeries.meanFlux;
+      const TW = state.timeWindow;
+      const tNow = state.t;
+      
+      let sumJ = 0, count = 0;
+      for (let i = J.length - 1; i >= 0; i--) {
+        if (T[i] >= tNow - TW) {
+          sumJ += J[i];
+          count++;
+        } else break;
+      }
+      const Javg = count > 0 ? (sumJ / count) : 0;
+      
+      // === Draw title ===
+      ctxTime.save();
+      ctxTime.fillStyle = "#cfd3dc";
+      ctxTime.font = "16px system-ui";
+      ctxTime.textAlign = "center";
+      ctxTime.fillText(
+        `⟨Flux⟩ over last ${TW.toFixed(1)} = ${Javg.toFixed(3)}`,
+        W / 2,
+        22
+      );
+      ctxTime.restore();
+      
+      const LEFT=72, RIGHT=W-72, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
       const tmin=tArr[0], tmax=tArr[tArr.length-1], mapX=v=> LEFT + ((v-tmin)/(tmax-tmin))*(RIGHT-LEFT);
       const xTicks = niceTicks(tmin, tmax, 6);
       drawBottomTicks(ctxTime, LEFT, RIGHT, BOTTOM, xTicks, mapX, AXIS_COLOR);
