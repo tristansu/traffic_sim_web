@@ -281,7 +281,7 @@ window.MathJax = {
           <canvas id="canvasOmega1" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="order" draggable="true" data-blurb="Global order parameter r(t) vs time over the most recent Time Window.">
+        <div class="card draggable resizable" data-id="order" draggable="true" data-blurb="Global order parameter η(t) vs time over the most recent Time Window.">
           <canvas id="canvasOrder" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>f
@@ -959,7 +959,7 @@ window.MathJax = {
       ctxOmega1.restore();
     }
 
-        // NEW: order parameter r(t) vs time with same moving window as ω₁(t)
+        // NEW: order parameter \eta(t) vs time with same moving window as ω₁(t)
     function drawOrderSeries(){
       const tArr = state.timeSeries.t;
       const yArr = state.timeSeries.orderR;
@@ -1021,7 +1021,7 @@ window.MathJax = {
       ctxOrder.save();
       ctxOrder.translate(14, H/2);
       ctxOrder.rotate(-Math.PI/2);
-      drawMathText(ctxOrder, "Order parameter r", 0, 0, { size: FONT_PX, align: 'center' });
+      drawMathText(ctxOrder, "Order parameter η(t)", 0, 0, { size: FONT_PX, align: 'center' });
       ctxOrder.restore();
     }
     
