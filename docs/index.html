@@ -23,11 +23,13 @@
       --w-omega:660px; 
       --h-omega:300px; 
       --w-omega1:660px; 
-      --h-omega1:300px; 
+      --h-omega1:300px;    
       --w-delta:660px; 
       --h-delta:300px; 
       --w-time:660px; 
-      --h-time:300px; 
+      --h-time:300px;
+      --w-order:660px; 
+      --h-order:300px; 
     }
     *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji;color:var(--text);background:radial-gradient(1200px 800px at 40% -200px,#1b1f2b 0%,var(--bg) 60%)}
     .shell{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto auto 1fr auto;gap:var(--grid-gap);min-height:100vh;padding:16px 16px 20px}
@@ -43,6 +45,7 @@
     .card[data-id="omega1"]{--card-w:var(--w-omega1);height:var(--h-omega1)} 
     .card[data-id="delta"]{--card-w:var(--w-delta);height:var(--h-delta)} 
     .card[data-id="time"]{--card-w:var(--w-time);height:var(--h-time)}
+    .card[data-id="order"]{--card-w:var(--w-order);height:var(--h-order)} 
     .resizable{min-width:280px;min-height:180px} .resizer{position:absolute;right:6px;bottom:6px;width:14px;height:14px;cursor:se-resize;border-radius:4px;border:1px solid #3a4359;background:linear-gradient(135deg,rgba(255,255,255,.18) 0 40%,rgba(255,255,255,0) 40%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
     .card[data-id="polar"] .cardTitle{font-weight:400;text-align:center}
     canvas{width:100%;height:auto;display:block;background:#0c0f15;border-radius:10px}
@@ -278,6 +281,10 @@ window.MathJax = {
           <canvas id="canvasOmega1" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
+        <div class="card draggable resizable" data-id="order" draggable="true" data-blurb="Global order parameter r(t) vs time over the most recent Time Window.">
+          <canvas id="canvasOrder" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
+          <div class="resizer" title="Drag to resize"></div>
+        </div>f
         <div class="card draggable resizable" data-id="delta" draggable="true" data-blurb="Neighbor spacing Δᵢ (rad). Dashed refs: 0 (white), 2π/N (gray), d₀/R (orange). Crash overlay triggers on overtake.">
           <canvas id="canvasDelta" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
@@ -303,6 +310,7 @@ window.MathJax = {
     const main = document.getElementById('canvasMain'), ctxMain = main.getContext('2d');
     const cnvOmega = document.getElementById('canvasOmega'), ctxOmega = cnvOmega.getContext('2d');
     const cnvOmega1 = document.getElementById('canvasOmega1'), ctxOmega1 = cnvOmega1.getContext('2d');
+    const cnvOrder = document.getElementById('canvasOrder'), ctxOrder = cnvOrder.getContext('2d');
     const cnvDelta = document.getElementById('canvasDelta'), ctxDelta = cnvDelta.getContext('2d');
     const cnvTime  = document.getElementById('canvasTime'),  ctxTime  = cnvTime.getContext('2d');
     const wrap = document.getElementById('canvasWrap');
@@ -545,7 +553,7 @@ window.MathJax = {
     let state={
       N:50,R:5,d0:0.5,epsilon:0.5,nfreq:0.5,dt:DT, stepsPerFrame:500, alphaRatio:0.5,
       alpha:0, alphaC:0, OmegaEq:0, t:0, theta:[], omega:[], colors:[], thetaVG:0,
-      timeSeries:{t:[],meanOmega:[],meanFlux:[],omega1:[]},
+      timeSeries:{t:[],meanOmega:[],meanFlux:[],omega1:[],orderR:[]},
       yMaxDelta:0, running:false, crashed:false,
       timeWindow:100  // NEW: default time window
     };
@@ -567,7 +575,7 @@ window.MathJax = {
       state.theta=new Array(N); state.omega=new Array(N);
       for(let i=0;i<N;i++){ state.theta[i]=i*d - epsilon*Math.sin(nfreq*i*d); state.omega[i]=state.OmegaEq; }
       state.colors=colormapHSV(N); state.thetaVG=0;
-      state.timeSeries={t:[],meanOmega:[],meanFlux:[],omega1:[]};
+      state.timeSeries={t:[],meanOmega:[],meanFlux:[],omega1:[],orderR:[]};
       state.yMaxDelta=0; state.t=0;
     }
 
@@ -951,6 +959,72 @@ window.MathJax = {
       ctxOmega1.restore();
     }
 
+        // NEW: order parameter r(t) vs time with same moving window as ω₁(t)
+    function drawOrderSeries(){
+      const tArr = state.timeSeries.t;
+      const yArr = state.timeSeries.orderR;
+      const {W,H} = prepCanvas(cnvOrder, ctxOrder);
+      if (tArr.length < 2 || yArr.length < 2) return;
+
+      const LEFT = 72, RIGHT = W - 16, TOP = 10, BOTTOM = H - 30;
+
+      const tmax = tArr[tArr.length - 1];
+      const windowWidth = state.timeWindow || 100;
+      const rawTmin = tArr[0];
+      const tmin = Math.max(rawTmin, tmax - windowWidth);
+
+      // Indices inside current time window
+      const idx = [];
+      for (let i = 0; i < tArr.length; i++) {
+        if (tArr[i] >= tmin - 1e-12) idx.push(i);
+      }
+      if (idx.length < 2) return;
+
+      const mapX = v => LEFT + ((v - tmin) / (tmax - tmin || 1)) * (RIGHT - LEFT);
+
+      // Axes
+      ctxOrder.strokeStyle = AXIS_COLOR;
+      ctxOrder.lineWidth   = AXIS_W;
+      ctxOrder.beginPath();
+      ctxOrder.moveTo(LEFT, BOTTOM);
+      ctxOrder.lineTo(RIGHT, BOTTOM);
+      ctxOrder.moveTo(LEFT, TOP);
+      ctxOrder.lineTo(LEFT, BOTTOM);
+      ctxOrder.stroke();
+
+      const xTicks = niceTicks(tmin, tmax, 6);
+      drawBottomTicks(ctxOrder, LEFT, RIGHT, BOTTOM, xTicks, mapX, AXIS_COLOR);
+
+      // r is in [0,1], so fix y-range with a small pad
+      const yLo = -0.05;
+      const yHi = 1.05;
+      const mapY = v => TOP + (1 - ((v - yLo) / (yHi - yLo || 1))) * (BOTTOM - TOP);
+
+      const yTicks = niceTicks(yLo, yHi, 5);
+      drawLeftTicks(ctxOrder, LEFT, TOP, BOTTOM, yTicks, mapY, AXIS_COLOR);
+
+      // r(t) curve (light blue, medium line width)
+      ctxOrder.strokeStyle = "#6ee7ff";
+      ctxOrder.lineWidth   = 2;
+      ctxOrder.beginPath();
+      let first = true;
+      for (const k of idx){
+        const x = mapX(tArr[k]);
+        const y = mapY(yArr[k]);
+        if (first) { ctxOrder.moveTo(x,y); first = false; }
+        else ctxOrder.lineTo(x,y);
+      }
+      ctxOrder.stroke();
+
+      // Axis labels
+      drawMathText(ctxOrder, "Time (1/Ω_{max})", W/2, H-8, { size: FONT_PX, align: 'center' });
+      ctxOrder.save();
+      ctxOrder.translate(14, H/2);
+      ctxOrder.rotate(-Math.PI/2);
+      drawMathText(ctxOrder, "Order parameter r", 0, 0, { size: FONT_PX, align: 'center' });
+      ctxOrder.restore();
+    }
+    
     // =========
     // Main loop
     // =========
@@ -962,12 +1036,16 @@ window.MathJax = {
         state.t += state.dt;
         if (state.crashed) { state.running = false; break; }
       }
-      const {meanJ,rmsOmega}=computeFluxAndStats(dth);
+            const {meanJ,rmsOmega}=computeFluxAndStats(dth);
+
+      // Order parameter r = | (1/N) Σ_j e^{i θ_j} |
+      const { r: rOrder } = complexMeanAngles(state.theta);
 
       state.timeSeries.t.push(state.t);
       state.timeSeries.meanOmega.push(state.OmegaEq>0? rmsOmega/state.OmegaEq : rmsOmega);
       state.timeSeries.meanFlux.push(meanJ);
       state.timeSeries.omega1.push(state.omega[0]); // agent #1 angular speed
+      state.timeSeries.orderR.push(rOrder);         // global order parameter
 
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = '+state.t.toFixed(1);
       drawMain(dth); 
@@ -975,6 +1053,7 @@ window.MathJax = {
       drawDeltaChart(dth); 
       drawTimeSeries();
       drawOmega1Series();
+      drawOrderSeries();
 
       if (!state.running) updateButtons();
       if (state.running && !state.crashed) rafId = requestAnimationFrame(tick);
@@ -992,11 +1071,14 @@ window.MathJax = {
     
       if (typeof updateKymos === 'function') updateKymos(dth);
     
-      const {meanJ, rmsOmega} = computeFluxAndStats(dth);
+            const {meanJ, rmsOmega} = computeFluxAndStats(dth);
+      const { r: rOrder } = complexMeanAngles(state.theta);
+
       state.timeSeries.t.push(state.t);
       state.timeSeries.meanOmega.push(state.OmegaEq>0 ? rmsOmega/state.OmegaEq : rmsOmega);
       state.timeSeries.meanFlux.push(meanJ);
       state.timeSeries.omega1.push(state.omega[0]); // agent #1 angular speed
+      state.timeSeries.orderR.push(rOrder);         // global order parameter
 
       titlePolar.innerHTML = 'T (Ω<sub>max</sub><sup>-1</sup>) = ' + state.t.toFixed(1);
       drawMain(dth);
@@ -1005,6 +1087,7 @@ window.MathJax = {
       if (typeof drawKymoPanels === 'function') drawKymoPanels();
       drawTimeSeries();
       drawOmega1Series();
+      drawOrderSeries();
     }
     
     // =====
@@ -1017,7 +1100,7 @@ window.MathJax = {
       state.crashed = false;
       forceInitialCheckboxes();
       initArrays();
-      state.timeSeries={t:[],meanOmega:[],meanFlux:[],omega1:[]}; 
+      state.timeSeries={t:[],meanOmega:[],meanFlux:[],omega1:[],orderR:[]}; 
       titlePolar.innerHTML='T (Ω<sub>max</sub><sup>-1</sup>) = 0.0';
       const d=new Array(state.N).fill(TWO_PI/state.N);
       drawMain(d); 
@@ -1025,6 +1108,7 @@ window.MathJax = {
       drawDeltaChart(d); 
       drawTimeSeries();
       drawOmega1Series();
+      drawOrderSeries();
       if(was){ state.running=true; rafId = requestAnimationFrame(tick); }
       updateButtons();
     }
@@ -1157,7 +1241,7 @@ window.MathJax = {
       if (btnStep) btnStep.disabled = !!state.running;
     }
     
-    function resizeAll(){
+        function resizeAll(){
       syncCanvasSizes();
       const d=currentDeltaTheta();
       drawMain(d); 
@@ -1165,14 +1249,16 @@ window.MathJax = {
       drawDeltaChart(d); 
       drawTimeSeries();
       drawOmega1Series();
+      drawOrderSeries();
     }
     
     inpSteps.addEventListener('input', ()=>{ let v=Math.round(+inpSteps.value); if(!Number.isFinite(v)||v<1) v=1; inpSteps.value=String(v); state.stepsPerFrame=v; });
-    if (inpTimeWindow) {
+        if (inpTimeWindow) {
       inpTimeWindow.addEventListener('input', () => {
         const val = parseFloat(inpTimeWindow.value || "100");
         state.timeWindow = (Number.isFinite(val) && val > 0) ? val : 100;
         drawOmega1Series();
+        drawOrderSeries();
       });
     }
 
