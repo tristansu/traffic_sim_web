@@ -644,7 +644,7 @@ window.MathJax = {
         const J=state.omega[i]/denom; meanJ+=J;
         const d=(state.omega[i]-state.OmegaEq); sumSq+=d*d;
       }
-      meanJ/=N; const rmsOmega=Math.sqrt(sumSq/(N*state.OmegaEq*state.OmegaEq));
+      meanJ/=N; const rmsOmega=Math.sqrt(sumSq/N);
       let rhoH=0,rhoL=Infinity;
       for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d); }
       const omegaL=Math.max(...state.omega);
