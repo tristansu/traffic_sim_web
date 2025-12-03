@@ -997,6 +997,29 @@ window.MathJax = {
       }
       if (idx.length < 2) return;
 
+      // === Compute time-window-averaged order parameter <η> ===
+      let sumEta = 0, countEta = 0;
+      for (const k of idx) {
+        const v = yArr[k];
+        if (!Number.isFinite(v)) continue;
+        sumEta += v;
+        countEta++;
+      }
+      const etaAvg = countEta > 0 ? sumEta / countEta : 0;
+      
+      // === Draw title ===
+      ctxOrder.save();
+      ctxOrder.fillStyle = "#cfd3dc";
+      ctxOrder.font = "16px system-ui";
+      ctxOrder.textAlign = "center";
+      ctxOrder.fillText(
+        `⟨η⟩ over last ${state.timeWindow.toFixed(1)} = ${etaAvg.toFixed(3)}`,
+        W / 2,
+        22
+      );
+      ctxOrder.restore();
+
+
       const mapX = v => LEFT + ((v - tmin) / (tmax - tmin || 1)) * (RIGHT - LEFT);
 
       // Axes
