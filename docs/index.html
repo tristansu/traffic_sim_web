@@ -903,7 +903,7 @@ window.MathJax = {
       const {W,H} = prepCanvas(cnvOmega1, ctxOmega1);
       if (tArr.length < 2 || yArr.length < 2) return;
 
-      const LEFT = 72, RIGHT = W - 16, TOP = 10, BOTTOM = H - 30;
+      const LEFT = 72, RIGHT = W - 16, TOP = 10, BOTTOM = H - 40;
 
       const tmax = tArr[tArr.length - 1];
       const windowWidth = state.timeWindow || 100;
@@ -967,7 +967,7 @@ window.MathJax = {
       ctxOmega1.stroke();
 
       // Axis labels
-      drawMathText(ctxOmega1, "Time (1/Ω_{max})", W/2, H+6, { size: FONT_PX, align: 'center' });
+      drawMathText(ctxOmega1, "Time (1/Ω_{max})", W/2,BOTTOM+28, { size: FONT_PX, align: 'center' });
       ctxOmega1.save();
       ctxOmega1.translate(14, H/2);
       ctxOmega1.rotate(-Math.PI/2);
