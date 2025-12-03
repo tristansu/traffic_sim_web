@@ -710,7 +710,14 @@ window.MathJax = {
       ctxOmega.moveTo(LEFT,TOP);    ctxOmega.lineTo(LEFT,BOTTOM);
       ctxOmega.stroke();
 
-      drawMathText(ctxOmega,`Ω_{ss} = ${state.OmegaEq.toFixed(4)}` ,W/2,TITLE_Y,{size:FONT_PX,align:'center'});
+      const wMax = Math.max(...state.omega);
+      drawMathText(
+        ctxOmega,
+        `Ω_{ss} = ${state.OmegaEq.toFixed(4)}   (max ωᵢ = ${wMax.toFixed(4)})`,
+        W/2,
+        TITLE_Y,
+        { size: FONT_PX, align: 'center' }
+      );
       ctxOmega.strokeStyle="#8a93a8"; ctxOmega.setLineDash([5,6]); ctxOmega.lineWidth=DASH_W;
       const yOeq=TOP+(1-(state.OmegaEq/1.05))*(BOTTOM-TOP);
       ctxOmega.beginPath(); ctxOmega.moveTo(LEFT,yOeq); ctxOmega.lineTo(RIGHT,yOeq); ctxOmega.stroke(); ctxOmega.setLineDash([]);
@@ -754,7 +761,15 @@ window.MathJax = {
       const {W,H}=prepCanvas(cnvDelta,ctxDelta);
       const LEFT=72, RIGHT=W-16, TITLE_Y=20, TOP=TITLE_Y+25, BOTTOM=H-30;
       const deltaVal = TWO_PI / state.N;
-      drawMathText(ctxDelta, `Δ^{*} = 2π/N = ${deltaVal.toFixed(4)}`, W/2, TITLE_Y, { size: FONT_PX, align: "center" });
+      const dMin = Math.min(...dth);
+      const dMax = Math.max(...dth);
+      drawMathText(
+        ctxDelta,
+        `Δ^{*} = 2π/N = ${deltaVal.toFixed(4)}   (min Δᵢ = ${dMin.toFixed(4)}, max Δᵢ = ${dMax.toFixed(4)})`,
+        W/2,
+        TITLE_Y,
+        { size: FONT_PX, align: "center" }
+      );
 
       ctxDelta.strokeStyle=AXIS_COLOR; ctxDelta.lineWidth=AXIS_W;
       ctxDelta.beginPath();
