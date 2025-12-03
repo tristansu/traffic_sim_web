@@ -885,7 +885,7 @@ window.MathJax = {
       ctxTime.strokeStyle="#6bb7ff"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<L.length;i++){ const x=mapX(tArr[i]), y=mapY1(L[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
       ctxTime.strokeStyle="#f5a14b"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<R.length;i++){ const x=mapX(tArr[i]), y=mapY2(R[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
       if(Number.isFinite(Jss)){ ctxTime.setLineDash([6,6]); ctxTime.lineWidth=DASH_W; ctxTime.strokeStyle="#f5a14b"; const yRef=mapY2(Jss); ctxTime.beginPath(); ctxTime.moveTo(LEFT,yRef); ctxTime.lineTo(RIGHT,yRef); ctxTime.stroke(); ctxTime.setLineDash([]); }
-      drawMathText(ctxTime,"Time (1/Ω_{max})",W/2,H+4,{size:FONT_PX,align:'center'});
+      drawMathText(ctxTime,"Time (1/Ω_{max})",W/2,H+6,{size:FONT_PX,align:'center'});
       ctxTime.save(); ctxTime.translate(14,H/2); ctxTime.rotate(-Math.PI/2); drawMathText(ctxTime, state.OmegaEq>0?"RMS(ω−Ω_{ss})/Ω_{ss}":"RMS(ω−Ω_{ss})",0,0,{size:FONT_PX,align:'center'}); ctxTime.restore();
       const rightTickStrings = niceTicks(rmin-rpad,rmax+rpad,5).map(v=>String(+v.toFixed(2)).replace(/\.00$/,""));
       ctxTime.font = `${12}px system-ui, -apple-system, Segoe UI, Roboto`;
@@ -967,7 +967,7 @@ window.MathJax = {
       ctxOmega1.stroke();
 
       // Axis labels
-      drawMathText(ctxOmega1, "Time (1/Ω_{max})", W/2, H+4, { size: FONT_PX, align: 'center' });
+      drawMathText(ctxOmega1, "Time (1/Ω_{max})", W/2, H+6, { size: FONT_PX, align: 'center' });
       ctxOmega1.save();
       ctxOmega1.translate(14, H/2);
       ctxOmega1.rotate(-Math.PI/2);
@@ -1051,7 +1051,7 @@ window.MathJax = {
       ctxOrder.stroke();
 
       // Axis labels
-      drawMathText(ctxOrder, "Time (1/Ω_{max})", W/2, H+4, { size: FONT_PX, align: 'center' });
+      drawMathText(ctxOrder, "Time (1/Ω_{max})", W/2, H+6, { size: FONT_PX, align: 'center' });
       ctxOrder.save();
       ctxOrder.translate(14, H/2);
       ctxOrder.rotate(-Math.PI/2);
