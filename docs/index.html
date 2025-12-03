@@ -867,14 +867,10 @@ window.MathJax = {
       ctxTime.fillStyle = "#ffffff";
       ctxTime.font = "16px system-ui";
       ctxTime.textAlign = "center";
-      ctxTime.fillText(
-        `⟨J⟩ over last ${TW.toFixed(1)} = ${Javg.toFixed(3)}`,
-        W / 2,
-        20
-      );
+      ctxTime.fillText(`⟨J⟩ over last ${TW.toFixed(1)} = ${Javg.toFixed(3)}`, W / 2, 12);
       ctxTime.restore();
       
-      const LEFT=72, RIGHT=W-72, TOP=10, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
+      const LEFT=72, RIGHT=W-72, TOP=26, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
       const tmin=tArr[0], tmax=tArr[tArr.length-1], mapX=v=> LEFT + ((v-tmin)/(tmax-tmin))*(RIGHT-LEFT);
       const xTicks = niceTicks(tmin, tmax, 6);
       drawBottomTicks(ctxTime, LEFT, RIGHT, BOTTOM, xTicks, mapX, AXIS_COLOR);
