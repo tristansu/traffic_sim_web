@@ -878,8 +878,10 @@ window.MathJax = {
       const xTicks = niceTicks(tmin, tmax, 6);
       drawBottomTicks(ctxTime, LEFT, RIGHT, BOTTOM, xTicks, mapX, AXIS_COLOR);
       const L=state.timeSeries.meanOmega, R=state.timeSeries.meanFlux, d=TWO_PI/state.N; const Jss=(state.R*d>state.d0)? (1-Math.exp(-(state.R*d-state.d0)))*(state.N/(TWO_PI)) : undefined;
-      let lmin=Math.min(...L), lmax=Math.max(...L); if(!isFinite(lmin)||!isFinite(lmax)){ lmin=0; lmax=1; } const lpad=(lmax-lmin||1)*.15; const mapY1=v=> TOP + (1-((v-(lmin-lpad))/((lmax+lpad)-(lmin-lpad))))*(H-40);
-      let rmin=Math.min(...R), rmax=Math.max(...R); if(Number.isFinite(Jss)){ rmin=Math.min(rmin,Jss); rmax=Math.max(rmax,Jss);} if(!isFinite(rmin)||!isFinite(rmax)){ rmin=0; rmax=1; } const rpad=(rmax-rmin||1)*.15; const mapY2=v=> TOP + (1-((v-(rmin-rpad))/((rmax+rpad)-(rmin-rpad))))*(H-40);
+      let lmin=Math.min(...L), lmax=Math.max(...L); if(!isFinite(lmin)||!isFinite(lmax)){ lmin=0; lmax=1; } const lpad=(lmax-lmin||1)*.15; 
+      const mapY1 = v =>TOP + (1 - ((v - (lmin - lpad)) / ((lmax + lpad) - (lmin - lpad)))) * (BOTTOM - TOP);
+      let rmin=Math.min(...R), rmax=Math.max(...R); if(Number.isFinite(Jss)){ rmin=Math.min(rmin,Jss); rmax=Math.max(rmax,Jss);} if(!isFinite(rmin)||!isFinite(rmax)){ rmin=0; rmax=1; } const rpad=(rmax-rmin||1)*.15; 
+      const mapY2 = v =>TOP + (1 - ((v - (rmin - rpad)) / ((rmax + rpad) - (rmin - rpad)))) * (BOTTOM - TOP);      
       drawLeftTicks(ctxTime,LEFT,TOP,BOTTOM,niceTicks(lmin-lpad,lmax+lpad,5),mapY1,AXIS_COLOR);
       drawRightTicks(ctxTime,RIGHT,TOP,BOTTOM,niceTicks(rmin-rpad,rmax+rpad,5),mapY2,"#f5a14b");
       ctxTime.strokeStyle="#6bb7ff"; ctxTime.lineWidth=2; ctxTime.beginPath(); for(let i=0;i<L.length;i++){ const x=mapX(tArr[i]), y=mapY1(L[i]); if(i===0) ctxTime.moveTo(x,y); else ctxTime.lineTo(x,y);} ctxTime.stroke();
