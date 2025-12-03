@@ -870,7 +870,7 @@ window.MathJax = {
       ctxTime.fillStyle = "#ffffff";
       ctxTime.font = "16px system-ui";
       ctxTime.textAlign = "center";
-      ctxTime.fillText(`⟨J⟩ over last ${TW.toFixed(1)} = ${Javg.toFixed(3)}`, W / 2, 14);
+      ctxTime.fillText(`⟨J⟩ over last ${TW.toFixed(1)} = ${Javg.toFixed(3)}`, W / 2, 10);
       ctxTime.restore();
       
       const LEFT=72, RIGHT=W-72, TOP=26, BOTTOM=H-30; ctxTime.strokeStyle=AXIS_COLOR; ctxTime.lineWidth=AXIS_W; ctxTime.beginPath(); ctxTime.moveTo(LEFT,BOTTOM); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.moveTo(LEFT,TOP); ctxTime.lineTo(LEFT,BOTTOM); ctxTime.moveTo(RIGHT,TOP); ctxTime.lineTo(RIGHT,BOTTOM); ctxTime.stroke();
@@ -1011,7 +1011,7 @@ window.MathJax = {
       ctxOrder.fillStyle = "#ffffff";
       ctxOrder.font = "16px system-ui";
       ctxOrder.textAlign = "center";
-      ctxOrder.fillText(`⟨η⟩ over last ${state.timeWindow.toFixed(1)} = ${etaAvg.toFixed(3)}`, W / 2, 14);
+      ctxOrder.fillText(`⟨η⟩ over last ${state.timeWindow.toFixed(1)} = ${etaAvg.toFixed(3)}`, W / 2, 10);
       ctxOrder.restore();
 
       const mapX = v => LEFT + ((v - tmin) / (tmax - tmin || 1)) * (RIGHT - LEFT);
