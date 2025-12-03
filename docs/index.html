@@ -983,7 +983,7 @@ window.MathJax = {
       const {W,H} = prepCanvas(cnvOrder, ctxOrder);
       if (tArr.length < 2 || yArr.length < 2) return;
 
-      const LEFT = 72, RIGHT = W - 16, TOP = 10, BOTTOM = H - 30;
+      const LEFT = 72, RIGHT = W - 16, TOP = 26, BOTTOM = H - 30;
 
       const tmax = tArr[tArr.length - 1];
       const windowWidth = state.timeWindow || 100;
@@ -1012,13 +1012,8 @@ window.MathJax = {
       ctxOrder.fillStyle = "#ffffff";
       ctxOrder.font = "16px system-ui";
       ctxOrder.textAlign = "center";
-      ctxOrder.fillText(
-        `⟨η⟩ over last ${state.timeWindow.toFixed(1)} = ${etaAvg.toFixed(3)}`,
-        W / 2,
-        20
-      );
+      ctxOrder.fillText(`⟨η⟩ over last ${state.timeWindow.toFixed(1)} = ${etaAvg.toFixed(3)}`, W / 2, 12);
       ctxOrder.restore();
-
 
       const mapX = v => LEFT + ((v - tmin) / (tmax - tmin || 1)) * (RIGHT - LEFT);
 
