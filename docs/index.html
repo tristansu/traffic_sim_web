@@ -641,19 +641,36 @@ window.MathJax = {
     }
 
     function computeFluxAndStats(dth){
-      const N=state.N; let meanJ=0,sumSq=0;
-      for(let i=0;i<N;i++){
-        const prev=(i-1+N)%N; const denom=Math.max(0.5*(dth[i]+dth[prev]),1e-6);
-        const J=state.omega[i]/denom; meanJ+=J;
-        const d=(state.omega[i]-state.OmegaEq); sumSq+=d*d;
+      const N = state.N;
+      let sumOmega = 0, sumSq = 0;
+    
+      for (let i = 0; i < N; i++) {
+        // Sum angular speeds for <J>
+        sumOmega += state.omega[i];
+    
+        // RMS of omega relative to OmegaEq (unchanged)
+        const d = (state.omega[i] - state.OmegaEq);
+        sumSq += d * d;
       }
-      meanJ/=N; const rmsOmega=Math.sqrt(sumSq/N);
-      let rhoH=0,rhoL=Infinity;
-      for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d); }
-      const omegaL=Math.max(...state.omega);
-      let vg=0; if(isFinite(rhoL)&&rhoH>0&&rhoL<rhoH) vg = omegaL*(rhoL/rhoH)/(1-(rhoL/rhoH));
-      state.thetaVG=wrapAngle(state.thetaVG - vg*state.dt*state.stepsPerFrame);
-      return {meanJ,rmsOmega};
+    
+      // New definition: <J> = (1 / 2π) * Σ_i ω_i
+      const meanJ = sumOmega / TWO_PI;
+    
+      const rmsOmega = Math.sqrt(sumSq / N);
+    
+      // The density-based stuff below stays exactly the same
+      let rhoH = 0, rhoL = Infinity;
+      for (const d of dth) {
+        rhoH = Math.max(rhoH, 1 / d);
+        rhoL = Math.min(rhoL, 1 / d);
+      }
+      const omegaL = Math.max(...state.omega);
+      let vg = 0;
+      if (isFinite(rhoL) && rhoH > 0 && rhoL < rhoH)
+        vg = omegaL * (rhoL / rhoH) / (1 - (rhoL / rhoH));
+    
+      state.thetaVG = wrapAngle(state.thetaVG - vg * state.dt * state.stepsPerFrame);
+      return { meanJ, rmsOmega };
     }
 
     // ============
