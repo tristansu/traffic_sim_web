@@ -538,13 +538,16 @@ window.MathJax = {
       for (const v of vals){
         const x = mapX(v);
         if (x < L-1 || x > R+1) continue;
+        // Draw tick downward (below the axis)
         ctx.beginPath();
         ctx.moveTo(x, B);
-        ctx.lineTo(x, B - 6);
+        ctx.lineTo(x, B + 6);
         ctx.stroke();
+        
+        // Label also below the axis
         const s = (Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1))
-                   .replace(/\.00?$/,''); 
-        drawMathText(ctx, s, x, B - 8, { size: 12, align: 'center', color });
+                   .replace(/\.00?$/,'');
+        drawMathText(ctx, s, x, B + 18, { size: 12, align: 'center', color });
       }
       ctx.restore();
     }
