@@ -713,7 +713,7 @@ window.MathJax = {
       const wMax = Math.max(...state.omega);
       drawMathText(
         ctxOmega,
-        `Ω_{ss} = ${state.OmegaEq.toFixed(4)}   (max ωᵢ = ${wMax.toFixed(4)})`,
+        `Ω_{ss} = ${state.OmegaEq.toFixed(4)}   (max ωᵢ/Ω_{max} = ${wMax.toFixed(4)})`,
         W/2,
         TITLE_Y,
         { size: FONT_PX, align: 'center' }
