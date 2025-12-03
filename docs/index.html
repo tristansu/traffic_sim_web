@@ -287,7 +287,7 @@ window.MathJax = {
           <canvas id="canvasOmega1" width="642" height="282" style="height: 282px; width: 642px;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
-        <div class="card draggable resizable" data-id="time" draggable="true" data-blurb="RMS(ω−Ω_eq) (left axis) and ⟨J⟩ (right axis) over time. Right dashed line = steady-state ⟨J⟩.">
+        <div class="card draggable resizable" data-id="time" draggable="true" data-blurb="RMS(ω−Ωₛₛ) (left axis) and ⟨J⟩ (right axis) over time. Right dashed line = steady-state ⟨J⟩.">
           <canvas id="canvasTime" width="642" height="282" style="height: 282px; width: 642px; display: block;"></canvas>
           <div class="resizer" title="Drag to resize"></div>
         </div>
@@ -644,7 +644,7 @@ window.MathJax = {
         const J=state.omega[i]/denom; meanJ+=J;
         const d=(state.omega[i]-state.OmegaEq); sumSq+=d*d;
       }
-      meanJ/=N; const rmsOmega=Math.sqrt(sumSq/N);
+      meanJ/=N; const rmsOmega=Math.sqrt(sumSq/(N*state.OmegaEq*state.OmegaEq);
       let rhoH=0,rhoL=Infinity;
       for(const d of dth){ rhoH=Math.max(rhoH,1/d); rhoL=Math.min(rhoL,1/d); }
       const omegaL=Math.max(...state.omega);
